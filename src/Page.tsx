@@ -22,14 +22,22 @@ const styles = StyleSheet.create({
 		backgroundColor: "#5e97da",
 		padding: 5,
 		color: "#ffffff",
-	}
+	},
+	flex: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+	},
 });
 
 const Page = ({ navigation, children }) => (
 	<Container>
 		<Header style={{ backgroundColor: "#5e97da" }}>
-			<Body>
+			<Body style={styles.flex}>
 				<Title>App</Title>
+				<Button transparent>
+					<FontAwesome5.Button name={'user-circle'} size={40} style={styles.icon} />
+				</Button>
 			</Body>
 		</Header>
 		<Content>
@@ -39,15 +47,15 @@ const Page = ({ navigation, children }) => (
 		<Footer style={styles.footer}>
 			<FooterTab style={{ backgroundColor: "#5e97da" }}>
 				<Button vertical onPress={() => navigation.navigate("Share")}>
-					<FontAwesome5 name="share" style={styles.icon} />
+					<FontAwesome5 name="share" size={20} style={styles.icon} />
 					<Text>Share</Text>
 				</Button>
 				<Button vertical onPress={() => navigation.navigate("Home")}>
-					<FontAwesome5 name="home" style={styles.icon} />
+					<FontAwesome5 name="home" size={20} style={styles.icon} />
 					<Text>Home</Text>
 				</Button>
 				<Button vertical onPress={() => navigation.navigate("Friends")}>
-					<FontAwesome5 name="users" style={styles.icon} />
+					<FontAwesome5 name="users" size={20} style={styles.icon} />
 					<Text>Friends</Text>
 				</Button>
 			</FooterTab>
