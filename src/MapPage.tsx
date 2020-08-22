@@ -16,7 +16,7 @@ const rasterProps = {
 const stylesheet = StyleSheet.create({
 	map: {
 		flex: 1,
-		height: 500,
+		height: 400,
 	}
 });
 
