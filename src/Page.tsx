@@ -16,7 +16,9 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
 const styles = StyleSheet.create({
 	icon: {
+		marginTop: 5,
 		padding: 5,
+		paddingTop: 0,
 		color: "#ffffff",
 	},
 	flex: {
