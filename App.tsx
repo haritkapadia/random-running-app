@@ -1,4 +1,6 @@
 import React from "react";
+import { StyleSheet } from 'react-native';
+
 import {
 	Container,
 	Text,
@@ -11,10 +13,12 @@ import {
 	Body,
 	Button,
 	Title,
+	Item,
+	Input,
 } from "native-base";
 
 const App = () => {
-    return (
+	return (
 		<Container>
 			<Header>
 				<Left>
@@ -26,13 +30,19 @@ const App = () => {
 				<Right />
 			</Header>
 			<Content>
-				<Text>UWU OwO UWU</Text>
+				<Item rounded>
+					<Input placeholder='Running distance' />
+				</Item>
 			</Content>
 			<Footer>
 				<Text>Foot</Text>
 			</Footer>
 		</Container>
-    );
+	);
 };
-
+const styles = StyleSheet.create({
+	content: {
+		display: "flex",
+	}
+});
 export default App;
