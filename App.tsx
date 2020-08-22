@@ -1,5 +1,6 @@
-import React from "react";
-import { StyleSheet } from "react-native";
+import React,{useState} from "react";
+import { StyleSheet,View,TouchableOpacity } from 'react-native';
+import ToastExample from "./ToastExample";
 // test
 import {
 	Container,
@@ -16,6 +17,7 @@ import {
 } from "native-base";
 
 const App = () => {
+	const[count,setCount]= useState(0);
 	return (
 		<Container>
 			<Header>
@@ -27,6 +29,16 @@ const App = () => {
 				<Item rounded>
 					<Input keyboardType="numeric" placeholder="Running distance" />
 				</Item>
+				<TouchableOpacity
+					style={styles.button}
+					onPress={()=>{
+						setCount(count+1);
+						ToastExample.show('button clicked!',ToastExample.SHORT)
+					}}
+				>
+					<Text>click me!</Text>
+				</TouchableOpacity>
+				<Text>clicked {count} times</Text>
 			</Content>
 		</Container>
 	);
