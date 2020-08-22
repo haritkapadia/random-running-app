@@ -1,14 +1,12 @@
-import React from 'react';
-import { View } from 'react-native';
-
-import Greeting from "./src/Greeting";
+import React from "react";
+import { Container, Text } from "native-base";
 
 const App = () => {
-	return (
-		<View>
-			<Greeting />
-		</View>
-	);
+    return (
+		<Container>
+			<Text>New hi UwU</Text>
+		</Container>
+    );
 };
 
 export default App;
