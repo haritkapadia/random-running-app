@@ -74,7 +74,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 				try {
 					toast("lat:"+loc.getLatitude()+", long: "+loc.getLongitude());
 					// URL looks like this: http://www.overpass-api.de/api/xapi_meta?*[bbox=11.5,48.1,11.6,48.2]
-					double d= .02;
+					double d= .01;
 					String url= "http://www.overpass-api.de/api/xapi_meta?*[bbox="
 						+ (loc.getLongitude()-d)+","
 						+ (loc.getLatitude()-d)+","
@@ -89,10 +89,49 @@ public class ToastModule extends ReactContextBaseJavaModule {
 					log("parsing!");
 					Document doc= db.parse(iStream);
 					log("parsed!");
+					// build an index of nodes
+					Map<String,Node> nodeMap= new HashMap<String,Node>(){{
+						NodeList nodes= doc.getElementsByTagName("node");
+						for(int i=0;i<nodes.getLength();++i) {
+							String id= nodes.item(i).getAttributes().getNamedItem("id").getTextContent();
+							log("node id: "+id);
+							put(id,nodes.item(i));
+						}
+					}};
+					// what types of roads are people allowed to jog on? (https://wiki.openstreetmap.org/wiki/Key:highway)
+					Set<String> permissibleHighways= new HashSet<String>(){{
+						addAll(Arrays.asList(new String[]{
+							"tertiary","unclassified","residential","tertiary_link","living_street","pedestrian","footway","steps"
+						}));
+					}};
 					NodeList nodes= doc.getElementsByTagName("way");
-					log("nodes.getLength(): "+nodes.getLength());
-					for(int i=0;i<nodes.getLength();++i)
-						log("way["+i+"]: "+nodes.item(i));
+					for(int i=0;i<nodes.getLength();++i) {
+						String id= nodes.item(i).getAttributes().getNamedItem("id").getTextContent();
+						log("way id= "+id);
+						log("way name="+nodes.item(i).getNodeName());
+						NodeList childs= nodes.item(i).getChildNodes();
+						log("childs.getLength(): "+childs.getLength());
+						for(int j=0;j<childs.getLength();++j) {
+							Node child= childs.item(j);
+							//log("child name: "+child.getNodeName());
+							if(!child.getNodeName().equals("tag")) {
+							//	log("not a tag");
+								continue;
+							}
+							log("child is a tag");
+							NamedNodeMap nm= child.getAttributes();
+							log("nm: "+nm);
+							for(int k=0;k<nm.getLength();++k)
+								log("key: "+nm.item(k));
+							String highway= nm.getNamedItem("k").getTextContent();
+							log("highway: "+highway);
+							if(!permissibleHighways.contains(highway)) {
+								log("can't jog here");
+								continue;
+							}
+							log("can jog here");
+						}
+					}
 					toast("done");
 				} catch(MalformedURLException e) {
 					log("malformed URL");
