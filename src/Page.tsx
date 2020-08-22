@@ -15,9 +15,6 @@ import {
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
 const styles = StyleSheet.create({
-	footer: {
-		height: 70,
-	},
 	icon: {
 		backgroundColor: "#5e97da",
 		padding: 5,
@@ -26,17 +23,16 @@ const styles = StyleSheet.create({
 });
 
 const Page = ({ navigation, children }) => (
-	<Container>
+	<Container style={{flex: 1}}>
 		<Header style={{ backgroundColor: "#5e97da" }}>
 			<Body>
 				<Title>App</Title>
 			</Body>
 		</Header>
-		<Content>
+		<Content contentContainerStyle={{flexGrow: 1}}>
 			{children}
 		</Content>
-		<Content />
-		<Footer style={styles.footer}>
+		<Footer>
 			<FooterTab style={{ backgroundColor: "#5e97da" }}>
 				<Button vertical onPress={() => navigation.navigate("Share")}>
 					<FontAwesome5 name="share" style={styles.icon} />
@@ -49,6 +45,10 @@ const Page = ({ navigation, children }) => (
 				<Button vertical onPress={() => navigation.navigate("Friends")}>
 					<FontAwesome5 name="users" style={styles.icon} />
 					<Text>Friends</Text>
+				</Button>
+				<Button vertical onPress={() => navigation.navigate("Map")}>
+					<FontAwesome5 name="map" style={styles.icon} />
+					<Text>Map</Text>
 				</Button>
 			</FooterTab>
 		</Footer>
