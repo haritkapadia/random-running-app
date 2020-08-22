@@ -30,7 +30,7 @@ const RunningPage = ({ navigation }) => {
 	const [count, setCount] = useState(0);
 	const windowWidth = Dimensions.get('window').width;
 	return <Page navigation={navigation}>
-		<View>
+		<Content>
 			<Item style={{
 				marginTop: 20,
 				marginLeft: 15,
@@ -56,38 +56,38 @@ const RunningPage = ({ navigation }) => {
 					</Item>
 				</Form>
 			</Content>
-		</View>
-		<View style={styles.container}>
-			<TouchableOpacity
-				style={styles.button}
-				onPress={async () => {
-					console.log("button clicked");
-					setCount(count + 1);
-					try {
-						// https://reactnative.dev/docs/permissionsandroid
-						const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
-							title: "Location Permission",
-							message: "Location is required to download a map of the area around you.",
-							buttonNeutral: "Ask me later",
-							buttonNegative: "Deny",
-							buttonPositive: "Grant",
-						});
-						console.log("granted:", result);
-						if (result !== PermissionsAndroid.RESULTS.GRANTED) {
-							console.log("permission denied");
-							return;
+			<View style={styles.container}>
+				<TouchableOpacity
+					style={styles.button}
+					onPress={async () => {
+						console.log("button clicked");
+						setCount(count + 1);
+						try {
+							// https://reactnative.dev/docs/permissionsandroid
+							const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+								title: "Location Permission",
+								message: "Location is required to download a map of the area around you.",
+								buttonNeutral: "Ask me later",
+								buttonNegative: "Deny",
+								buttonPositive: "Grant",
+							});
+							console.log("granted:", result);
+							if (result !== PermissionsAndroid.RESULTS.GRANTED) {
+								console.log("permission denied");
+								return;
+							}
+						} catch (e) {
+							console.log("exception thrown");
 						}
-					} catch (e) {
-						console.log("exception thrown");
-					}
-					ToastExample.run();
-					//ToastExample.show("button clicked", ToastExample.SHORT)
-				}}
-			>
-				<Text>Click me!</Text>
-			</TouchableOpacity>
-			<Text>clicked {count} times</Text>
-		</View>
+						ToastExample.run();
+						//ToastExample.show("button clicked", ToastExample.SHORT)
+					}}
+				>
+					<Text>Click me!</Text>
+				</TouchableOpacity>
+				<Text>clicked {count} times</Text>
+			</View>
+		</Content>
 	</Page>
 };
 export default RunningPage;
