@@ -10,7 +10,7 @@ import {
 import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text, Dimensions } from "react-native";
 import ToastExample from "../ToastExample";
 import Page from "./Page";
-import styleURL from "./MapPage";
+import {styleURL} from "./MapPage";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 
 const styles = StyleSheet.create({
@@ -65,18 +65,23 @@ const RunningPage = ({ navigation }) => {
 				onPress={async () => {
 					console.log("button clicked");
 					setCount(count + 1);
-					console.log("styleURL: ",styleURL);
-					await MapboxGL.offlineManager.createPack(
+					ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));
+					/*
+					await MapboxGL.offlineManager.deletePack("offlinePack");
+					const packs= await MapboxGL.offlineManager.getPacks();
+					console.log("packs:",packs);
+					packs.map(pack=>console.log("pack:",pack));
+					console.log("createPack: ",await MapboxGL.offlineManager.createPack(
 						{
 							name:"offlinePack",
 							styleURL:styleURL,
-							minZoom:0,
+							minZoom:14,
 							maxZoom:22,
 							bounds:[[-79.34631368999999,43.79820711],[-79.36631369,43.778207110000004]]
 						},
-						(offlineRegion,status)=>console.log(offlineRegion,status),
-						(offlineRegion,err)=>console.log(offlineRegion,err)
-					);
+						(offlineRegion,status)=>console.log("progress:",offlineRegion,status),
+						(offlineRegion,err)=>console.log("err:",offlineRegion,err)
+					));*/
 					/*
 					try {
 						// https://reactnative.dev/docs/permissionsandroid
