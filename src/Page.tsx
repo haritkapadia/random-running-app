@@ -7,6 +7,7 @@ import {
 	FooterTab,
 	Content,
 	Container,
+	Icon,
 	Header,
 	Body,
 	Title,
@@ -19,6 +20,7 @@ const styles = StyleSheet.create({
 	},
 	icon: {
 		backgroundColor: "#5e97da",
+		padding: 5,
 	}
 });
 
@@ -32,6 +34,7 @@ const Page = ({ navigation, children }) => (
 		<Content>
 			{children}
 		</Content>
+		<Content />
 		<Footer style={styles.footer}>
 			<FooterTab style={{ backgroundColor: "#5e97da" }}>
 				<Button vertical onPress={() => navigation.navigate("Share")}>
@@ -39,8 +42,8 @@ const Page = ({ navigation, children }) => (
 					<Text>Share</Text>
 				</Button>
 				<Button vertical onPress={() => navigation.navigate("Home")}>
-					<FontAwesome5.Button name={'running'} light style={styles.icon} />
-					<Text>Run</Text>
+					<FontAwesome5.Button name={'home'} style={styles.icon} />
+					<Text>Home</Text>
 				</Button>
 				<Button vertical onPress={() => navigation.navigate("Friends")}>
 					<FontAwesome5.Button name={'users'} style={styles.icon} />

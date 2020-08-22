@@ -2,20 +2,23 @@ import React, { useState } from "react";
 import {
 	Item,
 	Input,
-	Content
+	Content,
+	Picker,
+	Container,
+	Form,
 } from "native-base";
-import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text } from "react-native";
+import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text, Dimensions } from "react-native";
 import ToastExample from "../ToastExample";
 import Page from "./Page";
+
 const styles = StyleSheet.create({
-	content: {
-		display: "flex",
-	},
+
 	button: {
 		alignItems: "center",
 		backgroundColor: "#dddddd",
 		padding: 10,
-		marginBottom: 10
+		marginBottom: 10,
+		marginTop: 20
 	},
 	container: {
 		flex: 1,
@@ -25,10 +28,35 @@ const styles = StyleSheet.create({
 });
 const RunningPage = ({ navigation }) => {
 	const [count, setCount] = useState(0);
+	const windowWidth = Dimensions.get('window').width;
 	return <Page navigation={navigation}>
-		<Item rounded>
-			<Input keyboardType="numeric" placeholder="Running distance" />
-		</Item>
+		<View>
+			<Item style={{
+				marginTop: 20,
+				marginLeft: 15,
+				marginRight: 15,
+				flex: 1,
+			}}>
+				<Input keyboardType="numeric" placeholder="Running distance" placeholderTextColor="black" />
+			</Item>
+
+			<Content>
+				<Form style={{ marginRight: 15, flex: 1 }}>
+					<Item regularpicker>
+						<Picker
+							mode="dropdown"
+							placeholderIconColor="#007aff"
+						//selectedValue={selected2}
+						//onValueChange={(value: string) => setSelected2(value)}
+						>
+							<Picker.Item label="km" value="key0" />
+							<Picker.Item label="mi" value="key1" />
+							<Picker.Item label="m" value="key1" />
+						</Picker>
+					</Item>
+				</Form>
+			</Content>
+		</View>
 		<View style={styles.container}>
 			<TouchableOpacity
 				style={styles.button}
