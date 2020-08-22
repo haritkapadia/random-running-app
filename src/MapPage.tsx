@@ -3,7 +3,6 @@ import { Text } from "native-base";
 import { StyleSheet } from "react-native";
 import Page from "./Page";
 import MapboxGL from "@react-native-mapbox-gl/maps";
-
 // https://stackoverflow.com/questions/61994333/how-to-implement-geocoder-with-react-native-mapbox-gl-maps-library-in-react-nat
 MapboxGL.setAccessToken('Mapbox token');
 MapboxGL.setConnected(true);

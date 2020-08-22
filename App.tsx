@@ -12,6 +12,7 @@ import RunningPage from "./src/RunningPage";
 import FriendsPage from "./src/FriendsPage";
 import SharePage from "./src/SharePage";
 import MapPage from "./src/MapPage";
+import ProfilePage from "./src/ProfilePage";
 const Stack = createStackNavigator();
 export default () =>
 	<NavigationContainer>
@@ -20,5 +21,7 @@ export default () =>
 			<Stack.Screen name="Share" component={SharePage} options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }} />
 			<Stack.Screen name="Friends" component={FriendsPage} options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }} />
 			<Stack.Screen name="Map" component={MapPage} options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }} />
+			<Stack.Screen name="Profile" component={ProfilePage} options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }} />
+
 		</Stack.Navigator>
 	</NavigationContainer>;
