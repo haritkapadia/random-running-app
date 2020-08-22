@@ -44,6 +44,39 @@ public class ToastModule extends ReactContextBaseJavaModule {
 	private void log(String str) {
 		Log.d("RandomRunningApp",str);
 	}
+	public static class MapNode
+	{
+		public final double lat;
+		public final double lon;
+		public MapNode(final double lat,final double lon)
+		{
+			this.lat = lat;
+			this.lon = lon;
+		}
+	}
+	public static class MapEdge
+	{
+		public final MapNode nodeA;
+		public final MapNode nodeB;
+		public final double length;
+		public MapEdge(final MapNode nodeA,final MapNode nodeB)
+		{
+			this.nodeA = nodeA;
+			this.nodeB = nodeB;
+			double radius = 6371;
+			double dlat = Math.toRadians(nodeB.lat - nodeA.lat);
+			double dlon = Math.toRadians(nodeB.lon - nodeA.lon);
+			double sdlat = Math.sin(dlat / 2);
+			double sdlon = Math.sin(dlon / 2);
+			double a = sdlat * sdlat + Math.cos(Math.toRadians(nodeA.lat)) * Math.cos(Math.toRadians(nodeB.lat)) * sdlon * sdlon;
+			double c = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1 - a));
+			length = radius * c;
+		}
+		public MapNode getOther(MapNode node)
+		{
+			return node == nodeA ? nodeB : nodeA;
+		}
+	}
 	@ReactMethod
 	public void run() {
 		log("test log");
@@ -69,79 +102,110 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			public void onStatusChanged(String str,int status,Bundle extras) {
 				toast("status changed: "+str);
 			}
-			@Override
-			public void onLocationChanged(Location loc) {
+			private boolean initialized = false;
+			private Map<MapNode,List<MapEdge>> adjList = new HashMap<>();
+			private void maybeInit(Location loc) {
+				if(initialized)
+					return;
+				initialized = true;
+				Set<String> permissibleHighways= new HashSet<String>(){{
+					addAll(Arrays.asList(new String[]{
+						"tertiary","unclassified","residential","tertiary_link","living_street","pedestrian","footway","steps"
+					}));
+				}};
+				double d= .01;
+				String url= "http://www.overpass-api.de/api/xapi_meta?*[bbox="
+					+ (loc.getLongitude()-d)+","
+					+ (loc.getLatitude()-d)+","
+					+ (loc.getLongitude()+d)+","
+					+ (loc.getLatitude()+d)
+				+"]";
+				log("creating BufferedInputStream wth URL: "+url);
+				BufferedInputStream iStream = null;
 				try {
-					toast("lat:"+loc.getLatitude()+", long: "+loc.getLongitude());
-					// URL looks like this: http://www.overpass-api.de/api/xapi_meta?*[bbox=11.5,48.1,11.6,48.2]
-					double d= .01;
-					String url= "http://www.overpass-api.de/api/xapi_meta?*[bbox="
-						+ (loc.getLongitude()-d)+","
-						+ (loc.getLatitude()-d)+","
-						+ (loc.getLongitude()+d)+","
-						+ (loc.getLatitude()+d)
-					+"]";
-					log("creating BufferedInputStream wth URL: "+url);
-					BufferedInputStream iStream= new BufferedInputStream(new URL(url).openStream());
-					// start parsing the xml
-					DocumentBuilderFactory dbf= DocumentBuilderFactory.newInstance();
-					DocumentBuilder db= dbf.newDocumentBuilder();
-					log("parsing!");
-					Document doc= db.parse(iStream);
-					log("parsed!");
-					// build an index of nodes
-					Map<String,Node> nodeMap= new HashMap<String,Node>(){{
-						NodeList nodes= doc.getElementsByTagName("node");
-						for(int i=0;i<nodes.getLength();++i) {
-							String id= nodes.item(i).getAttributes().getNamedItem("id").getTextContent();
-							log("node id: "+id);
-							put(id,nodes.item(i));
-						}
-					}};
-					// what types of roads are people allowed to jog on? (https://wiki.openstreetmap.org/wiki/Key:highway)
-					Set<String> permissibleHighways= new HashSet<String>(){{
-						addAll(Arrays.asList(new String[]{
-							"tertiary","unclassified","residential","tertiary_link","living_street","pedestrian","footway","steps"
-						}));
-					}};
-					NodeList nodes= doc.getElementsByTagName("way");
-					for(int i=0;i<nodes.getLength();++i) {
-						String id= nodes.item(i).getAttributes().getNamedItem("id").getTextContent();
-						log("way id= "+id);
-						log("way name="+nodes.item(i).getNodeName());
-						NodeList childs= nodes.item(i).getChildNodes();
-						log("childs.getLength(): "+childs.getLength());
-						for(int j=0;j<childs.getLength();++j) {
-							Node child= childs.item(j);
-							//log("child name: "+child.getNodeName());
-							if(!child.getNodeName().equals("tag")) {
-							//	log("not a tag");
-								continue;
-							}
-							log("child is a tag");
-							NamedNodeMap nm= child.getAttributes();
-							log("nm: "+nm);
-							for(int k=0;k<nm.getLength();++k)
-								log("key: "+nm.item(k));
-							String highway= nm.getNamedItem("k").getTextContent();
-							log("highway: "+highway);
-							if(!permissibleHighways.contains(highway)) {
-								log("can't jog here");
-								continue;
-							}
-							log("can jog here");
-						}
-					}
-					toast("done");
+					iStream = new BufferedInputStream(new URL(url).openStream());
 				} catch(MalformedURLException e) {
-					log("malformed URL");
+					throw new RuntimeException(e);
 				} catch(IOException e) {
 					log("couldn't open stream");
-				} catch(ParserConfigurationException e) {
-					log("couldn't create new document builder");
-				} catch(SAXException e) {
-					log("SAXException while parsing xml");
 				}
+				DocumentBuilderFactory dbf= DocumentBuilderFactory.newInstance();
+				DocumentBuilder db;
+				try {
+					db = dbf.newDocumentBuilder();
+				} catch(ParserConfigurationException e) {
+					throw new RuntimeException(e);
+				}
+				log("parsing!");
+				Document doc;
+				try {
+					doc = db.parse(iStream);
+				} catch(IOException e) {
+					throw new RuntimeException(e);
+				} catch(SAXException e) {
+					throw new RuntimeException(e);
+				}
+				Map<Integer,MapNode> mapNodes = new HashMap<>();
+				NodeList ways = doc.getElementsByTagName("way");
+				List<MapEdge> edgeList = new ArrayList<>();
+				int length = ways.getLength();
+				for(int i = 0;i < length;i++)
+				{
+					Node way = ways.item(i);
+					NodeList children = way.getChildNodes();
+					int numChildren = children.getLength();
+					boolean isRoute = false;
+					List<Integer> nodeIdList = new ArrayList<>();
+					for(int j = 0;j < numChildren;j++)
+					{
+						Node child = children.item(j);
+						String childName = child.getNodeName();
+						NamedNodeMap nnm = child.getAttributes();
+						if(childName.equals("nd"))
+						{
+							int nodeId = Integer.parseInt(nnm.getNamedItem("ref").getTextContent());
+							nodeIdList.add(nodeId);
+						} else if(childName.equals("tag")) {
+							String k = nnm.getNamedItem("k").getTextContent();
+							String v = nnm.getNamedItem("v").getTextContent();
+							if(k.equals("highway") && permissibleHighways.contains(v))
+								isRoute = true;
+						}
+					}
+					if(isRoute)
+					{
+						for(int nodeId : nodeIdList)
+						{
+							if(mapNodes.get(nodeId) == null)
+							{
+								Node node = doc.getElementById(String.valueOf(nodeId));
+								NamedNodeMap nnm = node.getAttributes();
+								double lat = Double.parseDouble(nnm.getNamedItem("lat").getTextContent());
+								double lon = Double.parseDouble(nnm.getNamedItem("lon").getTextContent());
+								MapNode mapNode = new MapNode(lat,lon);
+								adjList.put(mapNode,new ArrayList<>());
+								mapNodes.put(nodeId,mapNode);
+							}
+						}
+						int nilLength = nodeIdList.size();
+						for(int j = 0;j < nilLength - 1;j++)
+						{
+							MapNode nodeA = mapNodes.get(nodeIdList.get(j));
+							MapNode nodeB = mapNodes.get(nodeIdList.get(j + 1));
+							edgeList.add(new MapEdge(nodeA,nodeB));
+						}
+					}
+				}
+				for(MapEdge edge : edgeList)
+				{
+					adjList.get(edge.nodeA).add(edge);
+					adjList.get(edge.nodeB).add(edge);
+				}
+			}
+			@Override
+			public void onLocationChanged(Location loc) {
+				//maybeInit(loc);
+				toast("test");
 			}
 		},null);
 	}
