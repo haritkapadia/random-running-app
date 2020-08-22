@@ -10,16 +10,12 @@ const data = [
 ];
 
 const LeaderboardPage = () => (
-    <Container>
-        <Content>
-            <Leaderboard
-			data={data}
-			sortBy="highScore"
-			labelBy="userName"
-			icon="icon"
-			/>
-        </Content>
-    </Container >
+	<Leaderboard
+	data={data}
+	sortBy="highScore"
+	labelBy="userName"
+	icon="icon"
+	/>
 );
 
 export default LeaderboardPage;
