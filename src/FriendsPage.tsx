@@ -3,16 +3,16 @@ import { Text, Container, Header, Tab, Tabs, ScrollableTab, Content } from "nati
 import { View, ScrollView } from "react-native";
 import Page from "./Page";
 import FriendsList from './FriendsList';
-import Leaderboard from "./Leaderboard";
+import LeaderboardPage from "./LeaderboardPage";
 
 const FriendsPage = ({ navigation }) => (
 	<Page navigation={navigation}>
-		<Tabs style={{flex: 1}}>
+		<Tabs style={{ flex: 1 }}>
 			<Tab heading="Friends">
 				<FriendsList />
 			</Tab>
 			<Tab heading="Leaderboard">
-				<Leaderboard />
+				<LeaderboardPage />
 			</Tab>
 		</Tabs>
 	</Page>
