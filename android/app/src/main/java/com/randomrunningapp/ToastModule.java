@@ -82,6 +82,8 @@ public class ToastModule extends ReactContextBaseJavaModule {
 						+ (loc.getLatitude()+d)
 					+"]";
 					log("creating BufferedInputStream wth URL: "+url);
+					if(1+1==2)
+						return;
 					BufferedInputStream iStream= new BufferedInputStream(new URL(url).openStream());
 					// start parsing the xml
 					DocumentBuilderFactory dbf= DocumentBuilderFactory.newInstance();

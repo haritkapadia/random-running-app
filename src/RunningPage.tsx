@@ -10,6 +10,8 @@ import {
 import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text, Dimensions } from "react-native";
 import ToastExample from "../ToastExample";
 import Page from "./Page";
+import styleURL from "./MapPage";
+import MapboxGL from "@react-native-mapbox-gl/maps";
 
 const styles = StyleSheet.create({
 
@@ -63,6 +65,19 @@ const RunningPage = ({ navigation }) => {
 				onPress={async () => {
 					console.log("button clicked");
 					setCount(count + 1);
+					console.log("styleURL: ",styleURL);
+					await MapboxGL.offlineManager.createPack(
+						{
+							name:"offlinePack",
+							styleURL:styleURL,
+							minZoom:0,
+							maxZoom:22,
+							bounds:[[-79.34631368999999,43.79820711],[-79.36631369,43.778207110000004]]
+						},
+						(offlineRegion,status)=>console.log(offlineRegion,status),
+						(offlineRegion,err)=>console.log(offlineRegion,err)
+					);
+					/*
 					try {
 						// https://reactnative.dev/docs/permissionsandroid
 						const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
@@ -81,6 +96,7 @@ const RunningPage = ({ navigation }) => {
 						console.log("exception thrown");
 					}
 					ToastExample.run();
+					*/
 					//ToastExample.show("button clicked", ToastExample.SHORT)
 				}}
 			>
