@@ -1,4 +1,5 @@
 import React from "react";
+import { Thumbnail } from "native-base";
 import { StyleSheet, Text } from "react-native";
 import {
 	Button,
@@ -14,9 +15,6 @@ import {
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
 const styles = StyleSheet.create({
-	footer: {
-		height: 70
-	},
 	icon: {
 		padding: 5,
 		color: "#ffffff",
@@ -37,7 +35,7 @@ const Page = ({ navigation, children }) => (
 			<Body style={styles.flex}>
 				<Title>App</Title>
 				<Button transparent>
-					<FontAwesome5.Button name={'user-circle'} size={40} style={styles.icon} />
+					<Thumbnail source={{ uri: "https://cdn.discordapp.com/attachments/347043966476353538/746779456152272916/unknown.png" }} style={{ width: 45, height: 45 }} />
 				</Button>
 			</Body>
 		</Header>
