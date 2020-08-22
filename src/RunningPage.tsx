@@ -53,7 +53,6 @@ const RunningPage = ({navigation}) => {
 						console.log("exception thrown");
 					}
 					ToastExample.run();
-//					ToastExample.show("button clicked", ToastExample.SHORT)
 				}}
 			>
 				<Text>Click me!</Text>
