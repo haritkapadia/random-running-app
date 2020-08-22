@@ -1,6 +1,6 @@
 import React from "react";
 import { Thumbnail } from "native-base";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import {
 	Button,
 	Footer,
@@ -27,6 +27,10 @@ const styles = StyleSheet.create({
 	footerText: {
 		color: "#ffffff",
 	},
+	content: {
+		flex: 1,
+		paddingBottom: 10
+	},
 });
 
 const Page = ({ navigation, children }) => (
@@ -39,9 +43,9 @@ const Page = ({ navigation, children }) => (
 				</Button>
 			</Body>
 		</Header>
-		<Content>
+		<View style={styles.content}>
 			{children}
-		</Content>
+		</View>
 		<Footer>
 			<FooterTab style={{ backgroundColor: "#5e97da" }}>
 				<Button vertical onPress={() => navigation.navigate("Share")}>

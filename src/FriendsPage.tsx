@@ -7,17 +7,14 @@ import Leaderboard from "./Leaderboard";
 
 const FriendsPage = ({ navigation }) => (
 	<Page navigation={navigation}>
-		<Content>
-			<Tabs>
-				<Tab heading="Friends">
-					<FriendsList />
-				</Tab>
-				<Tab heading="Leaderboard">
-					<Leaderboard />
-				</Tab>
-
-			</Tabs>
-		</Content>
+		<Tabs style={{flex: 1}}>
+			<Tab heading="Friends">
+				<FriendsList />
+			</Tab>
+			<Tab heading="Leaderboard">
+				<Leaderboard />
+			</Tab>
+		</Tabs>
 	</Page>
 );
 
