@@ -12,7 +12,7 @@ import {
 	Body,
 	Title,
 } from "native-base";
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
 const styles = StyleSheet.create({
 	footer: {
@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
 	icon: {
 		backgroundColor: "#5e97da",
 		padding: 5,
+		color: "#ffffff",
 	}
 });
 
@@ -38,15 +39,15 @@ const Page = ({ navigation, children }) => (
 		<Footer style={styles.footer}>
 			<FooterTab style={{ backgroundColor: "#5e97da" }}>
 				<Button vertical onPress={() => navigation.navigate("Share")}>
-					<FontAwesome5.Button name={'share'} style={styles.icon} />
+					<FontAwesome5 name="share" style={styles.icon} />
 					<Text>Share</Text>
 				</Button>
 				<Button vertical onPress={() => navigation.navigate("Home")}>
-					<FontAwesome5.Button name={'home'} style={styles.icon} />
+					<FontAwesome5 name="home" style={styles.icon} />
 					<Text>Home</Text>
 				</Button>
 				<Button vertical onPress={() => navigation.navigate("Friends")}>
-					<FontAwesome5.Button name={'users'} style={styles.icon} />
+					<FontAwesome5 name="users" style={styles.icon} />
 					<Text>Friends</Text>
 				</Button>
 			</FooterTab>
