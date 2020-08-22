@@ -1,5 +1,5 @@
 import React,{useState} from "react";
-import { StyleSheet,View,TouchableOpacity } from 'react-native';
+import { StyleSheet,View,TouchableOpacity,PermissionsAndroid } from 'react-native';
 import ToastExample from "./ToastExample";
 // test
 import {
@@ -33,14 +33,33 @@ const App = () => {
 			</Header>
 			<Content>
 				<Item rounded>
-					<Input placeholder='Running distance' />
+					<Input placeholder='Running distance'/>
 				</Item>
 				<View style={styles.container}>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={()=>{
+						onPress={async ()=>{
+							try {
+								// https://reactnative.dev/docs/permissionsandroid
+								const result=await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+									title: "Location Permission",
+									message: "Location is required to download a map of the area around you.",
+									buttonNeutral: "Ask me later",
+									buttonNegative: "Deny",
+									buttonPositive: "Grant",
+
+								});
+								console.log("granted:",result);
+								if(result!==PermissionsAndroid.RESULTS.GRANTED) {
+									console.log("permission denied");
+									return;
+								}
+							} catch(e) {
+								console.log("exception thrown");
+							}
 							setCount(count+1);
-							ToastExample.show('button clicked!',ToastExample.SHORT)
+							ToastExample.run();
+							//ToastExample.show('button clicked!',ToastExample.SHORT);
 						}}
 					>
 						<Text>click me!</Text>
@@ -64,10 +83,10 @@ const styles = StyleSheet.create({
 		padding:10,
 		marginBottom:10
 	},
-		container:{
-			flex:1,
-			justifyContent:'center',
-			alignItems:'center'
-		},
+	container:{
+		flex:1,
+		justifyContent:'center',
+		alignItems:'center'
+	},
 });
 export default App;
