@@ -34,7 +34,7 @@ const Page = ({ navigation, children }) => (
 		<Header style={{ backgroundColor: "#5e97da" }}>
 			<Body style={styles.flex}>
 				<Title>App</Title>
-				<Button transparent>
+				<Button transparent onPress={() => navigation.navigate("Profile")}>
 					<Thumbnail source={{ uri: "https://cdn.discordapp.com/attachments/347043966476353538/746779456152272916/unknown.png" }} style={{ width: 45, height: 45 }} />
 				</Button>
 			</Body>
