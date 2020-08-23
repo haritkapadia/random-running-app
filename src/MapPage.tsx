@@ -3,7 +3,7 @@ import { Text } from "native-base";
 import { StyleSheet } from "react-native";
 import Page from "./Page";
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import { lineString } from "@turf/helpers";
+import { lineString, point } from "@turf/helpers";
 
 const rasterProps = {
 	id: "mapSource", // must be unique within the app, is referred to by `RasterSource`s
@@ -14,50 +14,78 @@ const rasterProps = {
 const stylesheet = StyleSheet.create({
 	map: {
 		flex: 1,
-		height: 400
 	}
 });
 
 const mapStyles = {
-	route: {
+	runPath: {
 		lineColor: "red",
 		lineCap: MapboxGL.LineJoin.Round,
 		lineWidth: 7,
 		lineOpacity: 0.7,
 	},
+	runPathStart: {
+		circleRadius: 7,
+		circleColor: "red",
+		circleOpacity: 1,
+	},
+	location: {
+		circleRadius: 10,
+		circleColor: "blue",
+		circleOpacity: 1,
+	}
 };
 
 // https://stackoverflow.com/questions/61994333/how-to-implement-geocoder-with-react-native-mapbox-gl-maps-library-in-react-nat
 MapboxGL.setAccessToken('Mapbox token');
 MapboxGL.setConnected(true);
 
-class MapPage extends React.Component {
+class MapPage extends React.Component<{runPath: number[][], location: number[]}> {
+
 	componentDidMount() {
 		//		MapboxGL.setTelemetryEnabled(false);
 	}
 	render() {
 		return (
 			<Page navigation={this.props.navigation}>
-				<Text>Before MapboxGL</Text>
 				<MapboxGL.MapView
 					style={stylesheet.map}
 					styleURL="https://gist.githubusercontent.com/diagonalisability/7d66ac89e7d06ce474662f671b750bc6/raw/490018ab10a51694b4c25dbc8b12d01f1e3d7b86/style.json"
 				>
-					<MapboxGL.Camera zoomLevel={16} centerCoordinate={[-122.400021, 37.789085]} />
+					<MapboxGL.Camera
+					zoomLevel={16}
+					centerCoordinate={this.props.runPath.length < 2 ? this.props.location : this.props.runPath[0]}
+					/>
 					<MapboxGL.RasterSource {...rasterProps}>
 						<MapboxGL.RasterLayer
 						id="mapLayer"
-						sourceID="mapSource"
 						/>
 					</MapboxGL.RasterSource>
+					{
+						this.props.runPath.length < 2 ? null : (
+							<>
+								<MapboxGL.ShapeSource
+									id="runPathSource"
+									shape={lineString(this.props.runPath)}
+								>
+									<MapboxGL.LineLayer id="runPathFill" style={mapStyles.runPath} />
+								</MapboxGL.ShapeSource>
+								<MapboxGL.ShapeSource
+									id="runPathStartSource"
+									shape={point(this.props.runPath[0])}
+								>
+									<MapboxGL.CircleLayer id="runPathStartFill" style={mapStyles.runPathStart} />
+								</MapboxGL.ShapeSource>
+							</>
+						)
+					}
 					<MapboxGL.ShapeSource
-						id="routeSource"
-						shape={lineString([[-122.400021, 37.789085], [-122.400021, 37.790085], [-122.401021, 37.791085]])}
+						id="locationSource"
+						shape={point(this.props.location)}
 					>
-						<MapboxGL.LineLayer id="routeFill" style={mapStyles.route} />
+						<MapboxGL.CircleLayer id="locationFill" style={mapStyles.location} />
 					</MapboxGL.ShapeSource>
 				</MapboxGL.MapView>
-				<Text>After MapboxGL</Text>
 			</Page>
 		);
 	}

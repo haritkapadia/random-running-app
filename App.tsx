@@ -17,23 +17,54 @@ import ProfilePage from "./src/ProfilePage";
 const Stack = createStackNavigator();
 
 export default () => {
+	// import ToastModule
+	const [location, setLocation] = React.useState([-122.400021, 37.789085]);
+	const [runPath, setRunPath] = React.useState([[0, 0]]);
+	const [running, setRunning] = React.useState(false);
+	const calculateRoute = (location : number[]) : number[][] => [
+		[-122.400021, 37.790085], location, [-122.401021, 37.791085], [-122.400021, 37.790085]
+	];
 	return (
 		<NavigationContainer>
+			{
+				/* <ToastModule onLocationChange={({x, y}) => setLocation([x, y])} /> */
+				/* If we have a LocationListener in ToastModule then we can do this */
+			}
 			<Stack.Navigator screenOptions={{ headerShown: false }}>
-				{[
-					{ name: "Home", component: RunningPage },
-					{ name: "Share", component: SharePage },
-					{ name: "Friends", component: FriendsPage },
-					{ name: "Map", component: MapPage },
-					{ name: "Profile", component: ProfilePage },
-				].map(({name, component}) => (
-					<Stack.Screen
-					key={name}
-					name={name}
-					component={component}
-					options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+				<Stack.Screen
+				name="Home"
+				component={(props) => (
+					<RunningPage
+					location={location}
+					setRunPath={(location : number[]) => setRunPath(calculateRoute(location)) }
+					running={running}
+					setRunning={setRunning}
+					{...props}
 					/>
-				))}
+				)}
+				options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+				/>
+				<Stack.Screen
+				name="Map"
+				component={(props) => (
+					<MapPage
+					location={location}
+					runPath={runPath}
+					{...props}
+					/>
+				) }
+				options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+				/>
+				<Stack.Screen
+				name="Friends"
+				component={FriendsPage}
+				options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+				/>
+				<Stack.Screen
+				name="Share"
+				component={SharePage}
+				options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+				/>
 			</Stack.Navigator>
 		</NavigationContainer>
 
