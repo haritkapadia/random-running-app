@@ -16,7 +16,8 @@ const stylesheet = StyleSheet.create({
 		flex: 1,
 	}
 });
-
+//const styleURL= "https://gist.githubusercontent.com/diagonalisability/7d66ac89e7d06ce474662f671b750bc6/raw/cd5f0dbfa6e0e7ae37bdcb4997b90939ba3f3b00/style.json";
+//export {styleURL};
 const mapStyles = {
 	runPath: {
 		lineColor: "red",

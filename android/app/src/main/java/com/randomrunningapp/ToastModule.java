@@ -77,6 +77,16 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			return node == nodeA ? nodeB : nodeA;
 		}
 	}
+	@ReactMethod void getLocation(Callback successCallback) {
+		((LocationManager)getCurrentActivity().getSystemService(Context.LOCATION_SERVICE)).requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {
+			@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }
+			@Override public void onProviderEnabled(String str) { log("provider enabled: "+str); }
+			@Override public void onStatusChanged(String str,int status,Bundle extras) { log("status changed: "+str); }
+			@Override public void onLocationChanged(Location loc) {
+				successCallback.invoke(loc.getLatitude(),loc.getLongitude());
+			}
+		},null);
+	}
 	@ReactMethod
 	public void run() {
 		log("test log");
@@ -90,18 +100,9 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		toast("getting location...");
 		// https://stackoverflow.com/questions/7979230/how-to-read-location-only-once-with-locationmanager-gps-and-network-provider-a
 		locMan.requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {
-			@Override
-			public void onProviderDisabled(String str) {
-				toast("provider disabled: "+str);
-			}
-			@Override
-			public void onProviderEnabled(String str) {
-				toast("provider enabled: "+str);
-			}
-			@Override
-			public void onStatusChanged(String str,int status,Bundle extras) {
-				toast("status changed: "+str);
-			}
+			@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }
+			@Override public void onProviderEnabled(String str) { log("provider enabled: "+str); }
+			@Override public void onStatusChanged(String str,int status,Bundle extras) { log("status changed: "+str); }
 			private boolean initialized = false;
 			private Map<MapNode,List<MapEdge>> adjList = new HashMap<>();
 			private void maybeInit(Location loc) {
@@ -122,13 +123,13 @@ public class ToastModule extends ReactContextBaseJavaModule {
 				+"]";
 				log("creating BufferedInputStream wth URL: "+url);
 				BufferedInputStream iStream = null;
-				try {
-					iStream = new BufferedInputStream(new URL(url).openStream());
-				} catch(MalformedURLException e) {
+//				try {
+					toast("lat:"+loc.getLatitude()+", long: "+loc.getLongitude());
+/*				} catch(MalformedURLException e) {
 					throw new RuntimeException(e);
 				} catch(IOException e) {
 					log("couldn't open stream");
-				}
+				}*/
 				DocumentBuilderFactory dbf= DocumentBuilderFactory.newInstance();
 				DocumentBuilder db;
 				try {
