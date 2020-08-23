@@ -59,6 +59,21 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			this.lat = lat;
 			this.lon = lon;
 		}
+		public double distanceTo(final double latB,final double lonB)
+		{
+			final double radius = 6371;
+			double dlat = Math.toRadians(latB - this.lat);
+			double dlon = Math.toRadians(lonB - this.lon);
+			double sdlat = Math.sin(dlat / 2);
+			double sdlon = Math.sin(dlon / 2);
+			double a = sdlat * sdlat + Math.cos(Math.toRadians(this.lat)) * Math.cos(Math.toRadians(latB)) * sdlon * sdlon;
+			double c = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1 - a));
+			return radius * c;
+		}
+		public double distanceTo(final MapNode nodeB)
+		{
+			return distanceTo(nodeB.lat,nodeB.lon);
+		}
 	}
 	public static class MapEdge
 	{
@@ -69,18 +84,21 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		{
 			this.nodeA = nodeA;
 			this.nodeB = nodeB;
-			double radius = 6371;
-			double dlat = Math.toRadians(nodeB.lat - nodeA.lat);
-			double dlon = Math.toRadians(nodeB.lon - nodeA.lon);
-			double sdlat = Math.sin(dlat / 2);
-			double sdlon = Math.sin(dlon / 2);
-			double a = sdlat * sdlat + Math.cos(Math.toRadians(nodeA.lat)) * Math.cos(Math.toRadians(nodeB.lat)) * sdlon * sdlon;
-			double c = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1 - a));
-			length = radius * c;
+			length = nodeA.distanceTo(nodeB);
 		}
 		public MapNode getOther(MapNode node)
 		{
 			return node == nodeA ? nodeB : nodeA;
+		}
+	}
+	public static class RouteStep
+	{
+		public final double dist;
+		public final MapNode node;
+		public RouteStep(double dist,MapNode node)
+		{
+			this.dist = dist;
+			this.node = node;
 		}
 	}
 	@ReactMethod void getLocation(Callback successCallback) {
@@ -230,6 +248,113 @@ public class ToastModule extends ReactContextBaseJavaModule {
 					adjList.get(edge.nodeA).add(edge);
 					adjList.get(edge.nodeB).add(edge);
 				}
+			}
+			private Map<MapNode,RouteStep> shortestPaths(MapNode start,double r) {
+				PriorityQueue<RouteStep> pq = new PriorityQueue<>(256,new Comparator<RouteStep>() {
+					@Override
+					public int compare(final RouteStep a,final RouteStep b) {
+						if(a.dist > b.dist)
+							return 1;
+						if(a.dist < b.dist)
+							return -1;
+						return 0;
+					}
+				});
+				pq.add(new RouteStep(0,start));
+				Map<MapNode,RouteStep> dist = new HashMap<>();
+				dist.put(start,new RouteStep(0,null));
+				while(pq.size() > 0) {
+					RouteStep rs = pq.poll();
+					MapNode u = rs.node;
+					if(rs.dist > dist.get(u).dist)
+						continue;
+					for(MapEdge e : adjList.get(u)) {
+						MapNode v = e.getOther(u);
+						RouteStep old = dist.get(v);
+						double odist;
+						if(old == null)
+							odist = Double.POSITIVE_INFINITY;
+						else
+							odist = old.dist;
+						double ndist = rs.dist + e.length;
+						if(ndist > r)
+							continue;
+						if(ndist < odist) {
+							dist.put(v,new RouteStep(ndist,u));
+							pq.add(new RouteStep(ndist,v));
+						}
+					}
+				}
+				return dist;
+			}
+			public double[][] calculateRoute(double lat,double lon,double r)
+			{
+				MapNode start = null;
+				double dist = Double.POSITIVE_INFINITY;
+				for(MapNode node : adjList.keySet())
+				{
+					double cdist = node.distanceTo(lat,lon);
+					if(dist > cdist)
+					{
+						start = node;
+						dist = cdist;
+					}
+				}
+				Map<MapNode,RouteStep> distStart = shortestPaths(start,r / 2);
+				List<MapNode> anchors = new ArrayList<>();
+				for(Map.Entry<MapNode,RouteStep> entry : distStart.entrySet()) {
+					log("dist start " + entry.getValue());
+					if(entry.getValue().dist >= r / 3)
+						anchors.add(entry.getKey());
+				}
+				log("# of anchors " + anchors.size());
+				Collections.shuffle(anchors);
+				MapNode primary = null;
+				MapNode secondary = null;
+				Map<MapNode,RouteStep> anchorDist = null;
+				for(MapNode anchor : anchors) {
+					anchorDist = shortestPaths(anchor,r / 2);
+					List<MapNode> possibleSecondaries = new ArrayList<>();
+					for(Map.Entry<MapNode,RouteStep> entry : anchorDist.entrySet()) {
+						double cdist = entry.getValue().dist + distStart.get(anchor).dist + distStart.get(entry.getKey()).dist;
+						if(0.8 * r <= cdist && cdist <= r * 1.2)
+							possibleSecondaries.add(entry.getKey());
+					}
+					log("secondaries " + possibleSecondaries.size());
+					if(possibleSecondaries.size() > 0) {
+						Collections.shuffle(possibleSecondaries);
+						primary = anchor;
+						secondary = possibleSecondaries.get(0);
+						break;
+					}
+				}
+				if(secondary == null)
+					return null;
+				List<MapNode> route = new ArrayList<>();
+				MapNode next = secondary;
+				do {
+					route.add(next);
+					next = anchorDist.get(next).node;
+				} while(next != primary);
+				next = primary;
+				do {
+					route.add(next);
+					next = distStart.get(next).node;
+				} while(next != null);
+				Collections.reverse(route);
+				next = secondary;
+				do {
+					next = distStart.get(next).node;
+					if(next == null)
+						break;
+					route.add(next);
+				} while(true);
+				double[][] res = new double[2][route.size()];
+				for(int i = 0;i < route.size();i++) {
+					res[0][i] = route.get(i).lat;
+					res[1][i] = route.get(i).lon;
+				}
+				return res;
 			}
 			@Override
 			public void onLocationChanged(Location loc) {
