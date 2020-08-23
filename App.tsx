@@ -59,17 +59,21 @@ export default class App extends React.Component {
 
 	render() {
 		const customSetRunPath = async (radius: number) => {
-			console.log("args: lat, long, radius", this.state.location[1], this.state.location[0], radius);
-			await ToastExample.maybeInit(this.state.location[1], this.state.location[0]);
-			ToastExample.calculateRoute(
-				this.state.location[1], this.state.location[0], radius, ([lat, lon]) => {
-					console.log("out before", [lat, lon]);
-					const newOut = lat.map((l, idx) => [lon[idx], l]);
-					console.log("out after", newOut);
-					this.setRunPath(newOut);
-				},
-				(err) => console.log(err)
-			);
+			if(this.state.running) {
+				this.setRunPath([]);
+			} else {
+				console.log("args: lat, long, radius", this.state.location[1], this.state.location[0], radius);
+				await ToastExample.maybeInit(this.state.location[1], this.state.location[0]);
+				ToastExample.calculateRoute(
+					this.state.location[1], this.state.location[0], radius, ([lat, lon]) => {
+						console.log("out before", [lat, lon]);
+						const newOut = lat.map((l, idx) => [lon[idx], l]);
+						console.log("out after", newOut);
+						this.setRunPath(newOut);
+					},
+					(err) => console.log(err)
+				);
+			}
 		};
 		return (
 			<NavigationContainer>
