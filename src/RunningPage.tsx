@@ -119,7 +119,7 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath, pr
 								console.log(pack);
 							});
 							/*
-							   ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));		
+							   ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));
 							   try {
 							   // https://reactnative.dev/docs/permissionsandroid
 							   const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
@@ -148,6 +148,6 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath, pr
 				</View>
 			</Content>
 		</Page>
-	)
+	);
 };
 export default RunningPage;

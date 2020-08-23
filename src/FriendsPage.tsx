@@ -5,8 +5,8 @@ import Page from "./Page";
 import FriendsList from './FriendsList';
 import LeaderboardPage from "./LeaderboardPage";
 
-const FriendsPage = ({ navigation }) => (
-	<Page navigation={navigation}>
+const FriendsPage = ({ navigation, profile }) => (
+	<Page navigation={navigation} profile={profile}>
 		<Tabs style={{ flex: 1 }}>
 			<Tab heading="Friends">
 				<FriendsList />

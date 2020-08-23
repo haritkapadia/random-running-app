@@ -37,8 +37,7 @@ const options = {
     },
 };
 
-const ProfilePage = ({ navigation }) => {
-    const [profile, setProfile] = useState("https://cdn.discordapp.com/attachments/347043966476353538/746848370605293599/Untitsdsled.png");
+const ProfilePage = ({ navigation, profile, setProfile }) => {
     return <Page navigation={navigation}>
         <View style={styles.container}>
             <Image

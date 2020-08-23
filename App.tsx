@@ -114,7 +114,7 @@ export default class App extends React.Component {
 						options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
 					>
 						{(props) => (
-							<ProfilePage profile={this.state.profile} {...props} />
+							<ProfilePage profile={this.state.profile} setProfile={this.setProfile} {...props} />
 						)}
 					</Stack.Screen>
 				</Stack.Navigator>
