@@ -1,6 +1,5 @@
 import React from "react";
 import { NativeEventEmitter, NativeModules } from "react-native";
-import { Text } from "native-base";
 import { StyleSheet } from "react-native";
 import Page from "./Page";
 import MapboxGL from "@react-native-mapbox-gl/maps";

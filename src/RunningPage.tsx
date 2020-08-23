@@ -6,6 +6,7 @@ import {
 	Picker,
 	Form,
 	Button,
+	Text as NativeBaseText
 } from "native-base";
 import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text } from "react-native";
 import ToastExample from "../ToastExample";
@@ -28,9 +29,17 @@ const styles = StyleSheet.create({
 		alignItems: "center"
 	},
 });
+
+const conversion = {
+	"km": 1,
+	"m": 0.001,
+	"mi": 0.621371
+};
+
 const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) => {
 	const [count, setCount] = useState(0);
 	const [unit, setUnit] = useState("km");
+	const [radius, setRadius] = useState("");
 	return <Page navigation={navigation}>
 		<Content>
 			<Content>
@@ -41,9 +50,14 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) 
 						marginRight: 15,
 						flex: 1,
 					}}>
-						<Input keyboardType="numeric" placeholder="Running distance" placeholderTextColor="black" />
+						<Input
+						keyboardType="numeric"
+						placeholder="Running distance"
+						onChangeText={(text) => setRadius(text) }
+						value={radius}
+						/>
 					</Item>
-					<Item regularpicker>
+					<Item>
 						<Picker
 							mode="dropdown"
 							placeholderIconColor="#007aff"
@@ -55,17 +69,16 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) 
 							<Picker.Item label="m" value="m" />
 						</Picker>
 					</Item>
-					<Item>
-						<Button
-							onPress={() => {
-								setRunPath(location);
-								setRunning(!running);
-							}}
-						>
-							<Text>{running === false ? "Start" : "Stop"}</Text>
-						</Button>
-					</Item>
+					<Button
+						onPress={() => {
+							setRunPath(parseFloat(radius) * conversion[unit]);
+							setRunning(!running);
+						}}
+					>
+						<NativeBaseText>{running === false ? "Start" : "Stop"}</NativeBaseText>
+					</Button>
 				</Form>
+				<Text>{parseFloat(radius) * conversion[unit]} km</Text>
 			</Content>
 		<View style={styles.container}>
 			<TouchableOpacity

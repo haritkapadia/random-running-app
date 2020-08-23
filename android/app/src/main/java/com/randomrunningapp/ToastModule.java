@@ -218,6 +218,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 						{
 							MapNode nodeA = mapNodes.get(nodeIdList.get(j));
 							MapNode nodeB = mapNodes.get(nodeIdList.get(j + 1));
+							log("edge " + nodeIdList.get(j) + " " + nodeIdList.get(j + 1));
 							edgeList.add(new MapEdge(nodeA,nodeB));
 						}
 					}
@@ -230,7 +231,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			}
 			@Override
 			public void onLocationChanged(Location loc) {
-				//maybeInit(loc);
+				maybeInit(loc);
 				toast("test");
 			}
 		},null);
