@@ -14,6 +14,7 @@ import android.location.*;
 import androidx.core.app.*;
 import javax.xml.parsers.*;
 import com.facebook.react.bridge.*;
+import com.facebook.react.modules.core.*;
 public class ToastModule extends ReactContextBaseJavaModule {
 	private static ReactApplicationContext reactContext;
 	private static final String DURATION_SHORT_KEY = "SHORT";
@@ -36,6 +37,11 @@ public class ToastModule extends ReactContextBaseJavaModule {
 	@ReactMethod
 	public void show(String message, int duration) {
 		Toast.makeText(getReactApplicationContext(), message, duration).show();
+	}
+	private void sendEvent(String eventName,WritableMap params) {
+		getReactApplicationContext()
+			.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+			.emit(eventName,params);
 	}
 	private void toast(String str) {
 		Toast.makeText(getReactApplicationContext(),str,Toast.LENGTH_SHORT).show();
@@ -97,6 +103,25 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			toast("GPS is off and i haven't bothered prompting you to turn it on");
 			return;
 		}
+		log("starting location updates");
+		locMan.requestLocationUpdates(
+			LocationManager.GPS_PROVIDER,
+			0, // minTimeMs
+			0, // minDistanceM
+			new LocationListener(){
+				@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }
+				@Override public void onProviderEnabled(String str) { log("provider enabled: "+str); }
+				@Override public void onStatusChanged(String str,int status,Bundle extras) { log("status changed: "+str); }
+				@Override public void onLocationChanged(Location loc) {
+					log("got an update, forwarding to JS-land");
+					// https://www.programcreek.com/java-api-examples/?class=com.facebook.react.bridge.WritableMap&method=putArray
+					WritableMap event= Arguments.createMap();
+					event.putDouble("lat",loc.getLatitude());
+					event.putDouble("lon",loc.getLongitude());
+					sendEvent("locUpdate",event);
+				}
+			}
+		);
 		toast("getting location...");
 		// https://stackoverflow.com/questions/7979230/how-to-read-location-only-once-with-locationmanager-gps-and-network-provider-a
 		locMan.requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {

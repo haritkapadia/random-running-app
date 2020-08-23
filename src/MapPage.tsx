@@ -1,4 +1,5 @@
 import React from "react";
+import { NativeEventEmitter, NativeModules } from "react-native";
 import { Text } from "native-base";
 import { StyleSheet } from "react-native";
 import Page from "./Page";
@@ -33,7 +34,16 @@ MapboxGL.setAccessToken('Mapbox token');
 MapboxGL.setConnected(true);
 class MapPage extends React.Component {
 	componentDidMount() {
+		console.log("componentDidMount");
 		//		MapboxGL.setTelemetryEnabled(false);
+		const eventEmitter= new NativeEventEmitter(NativeModules.ToastExample);
+		this.eventListener= eventEmitter.addListener("locUpdate",(event)=>{
+			console.log(event.lat);
+			console.log(event.lon);
+		});
+	}
+	componentWillUnmount() {
+		this.eventListener.remove();
 	}
 	render() {
 		return (
