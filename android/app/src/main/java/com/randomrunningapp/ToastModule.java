@@ -360,15 +360,17 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			@Override
 			public void onLocationChanged(Location loc) {
 				maybeInit(loc);
-				calculateRoute(loc.getLatitude(),loc.getLongitude(),5);
+				//calculateRoute(loc.getLatitude(),loc.getLongitude(),5);
 				toast("test");
 			}
 		};
 		locMan.requestSingleUpdate(LocationManager.GPS_PROVIDER,locationListener,null);
+		/*
 		Location fakeLoc = new Location("gps");
 		fakeLoc.setLatitude(43.806683);
 		fakeLoc.setLongitude(-79.424121);
 		locationListener.onLocationChanged(fakeLoc);
+		*/
 		//locationListener.calculateRoute(fakeLoc.getLatitude(),fakeLoc.getLongitude(),5);
 	}
 }
