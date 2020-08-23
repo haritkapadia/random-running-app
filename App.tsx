@@ -21,8 +21,8 @@ export default () => {
 	const [location, setLocation] = React.useState([-122.400021, 37.789085]);
 	const [runPath, setRunPath] = React.useState([[0, 0]]);
 	const [running, setRunning] = React.useState(false);
-	const calculateRoute = (location : number[]) : number[][] => [
-		[-122.400021, 37.790085], location, [-122.401021, 37.791085], [-122.400021, 37.790085]
+	const calculateRoute = (radius: number) => [
+		[-122.400021, 37.790085], [-122.401021, 37.791085], [-122.400021, 37.790085]
 	];
 	return (
 		<NavigationContainer>
@@ -36,7 +36,7 @@ export default () => {
 				component={(props) => (
 					<RunningPage
 					location={location}
-					setRunPath={(location : number[]) => setRunPath(calculateRoute(location)) }
+					setRunPath={(radius: number) => setRunPath(calculateRoute(radius)) }
 					running={running}
 					setRunning={setRunning}
 					{...props}
@@ -63,6 +63,11 @@ export default () => {
 				<Stack.Screen
 				name="Share"
 				component={SharePage}
+				options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+				/>
+				<Stack.Screen
+				name="Profile"
+				component={ProfilePage}
 				options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
 				/>
 			</Stack.Navigator>
