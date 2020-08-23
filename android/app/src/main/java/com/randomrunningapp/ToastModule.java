@@ -101,6 +101,217 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			this.node = node;
 		}
 	}
+	private boolean initialized = false;
+	private Map<MapNode,List<MapEdge>> adjList = new HashMap<>();
+	@ReactMethod private void maybeInit(Location loc) {
+		if(initialized)
+			return;
+		initialized = true;
+		Set<String> permissibleHighways= new HashSet<String>(){{
+			addAll(Arrays.asList(new String[]{
+				"tertiary","unclassified","residential","tertiary_link","living_street","pedestrian","footway","steps"
+			}));
+		}};
+		double d= .01;
+		String url= "http://www.overpass-api.de/api/xapi_meta?*[bbox="
+			+ (loc.getLongitude()-d)+","
+			+ (loc.getLatitude()-d)+","
+			+ (loc.getLongitude()+d)+","
+			+ (loc.getLatitude()+d)
+		+"]";
+		log("creating BufferedInputStream wth URL: "+url);
+		BufferedInputStream iStream = null;
+		try {
+			iStream= new BufferedInputStream(new URL(url).openStream());
+			toast("lat:"+loc.getLatitude()+", long: "+loc.getLongitude());
+		} catch(MalformedURLException e) {
+			throw new RuntimeException(e);
+		} catch(IOException e) {
+			log("couldn't open stream");
+		}
+		DocumentBuilderFactory dbf= DocumentBuilderFactory.newInstance();
+		DocumentBuilder db;
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch(ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+		log("parsing!");
+		Document doc;
+		try {
+			doc = db.parse(iStream);
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		} catch(SAXException e) {
+			throw new RuntimeException(e);
+		}
+		Map<Long,MapNode> mapNodes = new HashMap<>();
+		NodeList ways = doc.getElementsByTagName("way");
+		List<MapEdge> edgeList = new ArrayList<>();
+		int length = ways.getLength();
+		for(int i = 0;i < length;i++)
+		{
+			Node way = ways.item(i);
+			NodeList children = way.getChildNodes();
+			int numChildren = children.getLength();
+			boolean isRoute = false;
+			List<Long> nodeIdList = new ArrayList<>();
+			for(int j = 0;j < numChildren;j++)
+			{
+				Node child = children.item(j);
+				String childName = child.getNodeName();
+				NamedNodeMap nnm = child.getAttributes();
+				if(childName.equals("nd"))
+				{
+					long nodeId = Long.parseLong(nnm.getNamedItem("ref").getTextContent());
+					nodeIdList.add(nodeId);
+				} else if(childName.equals("tag")) {
+					String k = nnm.getNamedItem("k").getTextContent();
+					String v = nnm.getNamedItem("v").getTextContent();
+					if(k.equals("highway") && permissibleHighways.contains(v))
+						isRoute = true;
+				}
+			}
+			if(isRoute)
+			{
+				log("found route " + i);
+				for(long nodeId : nodeIdList)
+				{
+					if(mapNodes.get(nodeId) == null)
+					{
+						Node node = doc.getElementById(String.valueOf(nodeId));
+						NamedNodeMap nnm = node.getAttributes();
+						double lat = Double.parseDouble(nnm.getNamedItem("lat").getTextContent());
+						double lon = Double.parseDouble(nnm.getNamedItem("lon").getTextContent());
+						MapNode mapNode = new MapNode(lat,lon);
+						adjList.put(mapNode,new ArrayList<>());
+						mapNodes.put(nodeId,mapNode);
+					}
+				}
+				int nilLength = nodeIdList.size();
+				for(int j = 0;j < nilLength - 1;j++)
+				{
+					MapNode nodeA = mapNodes.get(nodeIdList.get(j));
+					MapNode nodeB = mapNodes.get(nodeIdList.get(j + 1));
+					log("edge " + nodeIdList.get(j) + " " + nodeIdList.get(j + 1));
+					edgeList.add(new MapEdge(nodeA,nodeB));
+				}
+			}
+		}
+		for(MapEdge edge : edgeList)
+		{
+			adjList.get(edge.nodeA).add(edge);
+			adjList.get(edge.nodeB).add(edge);
+		}
+	}
+	private Map<MapNode,RouteStep> shortestPaths(MapNode start,double r) {
+		PriorityQueue<RouteStep> pq = new PriorityQueue<>(256,new Comparator<RouteStep>() {
+			@Override
+			public int compare(final RouteStep a,final RouteStep b) {
+				if(a.dist > b.dist)
+					return 1;
+				if(a.dist < b.dist)
+					return -1;
+				return 0;
+			}
+		});
+		pq.add(new RouteStep(0,start));
+		Map<MapNode,RouteStep> dist = new HashMap<>();
+		dist.put(start,new RouteStep(0,null));
+		while(pq.size() > 0) {
+			RouteStep rs = pq.poll();
+			MapNode u = rs.node;
+			if(rs.dist > dist.get(u).dist)
+				continue;
+			for(MapEdge e : adjList.get(u)) {
+				MapNode v = e.getOther(u);
+				RouteStep old = dist.get(v);
+				double odist;
+				if(old == null)
+					odist = Double.POSITIVE_INFINITY;
+				else
+					odist = old.dist;
+				double ndist = rs.dist + e.length;
+				if(ndist > r)
+					continue;
+				if(ndist < odist) {
+					dist.put(v,new RouteStep(ndist,u));
+					pq.add(new RouteStep(ndist,v));
+				}
+			}
+		}
+		return dist;
+	}
+	@ReactMethod public double[][] calculateRoute(double lat,double lon,double r)
+	{
+		MapNode start = null;
+		double dist = Double.POSITIVE_INFINITY;
+		for(MapNode node : adjList.keySet())
+		{
+			double cdist = node.distanceTo(lat,lon);
+			if(dist > cdist)
+			{
+				start = node;
+				dist = cdist;
+			}
+		}
+		Map<MapNode,RouteStep> distStart = shortestPaths(start,r);
+		List<MapNode> anchors = new ArrayList<>();
+		for(Map.Entry<MapNode,RouteStep> entry : distStart.entrySet()) {
+			log("dist start " + entry.getValue().dist);
+			double cdist = entry.getValue().dist;
+			if(r / 3 <= cdist && cdist <= r / 2)
+				anchors.add(entry.getKey());
+		}
+		log("# of anchors " + anchors.size());
+		Collections.shuffle(anchors);
+		MapNode primary = null;
+		MapNode secondary = null;
+		Map<MapNode,RouteStep> anchorDist = null;
+		for(MapNode anchor : anchors) {
+			anchorDist = shortestPaths(anchor,r / 2);
+			List<MapNode> possibleSecondaries = new ArrayList<>();
+			for(Map.Entry<MapNode,RouteStep> entry : anchorDist.entrySet()) {
+				double cdist = entry.getValue().dist + distStart.get(anchor).dist + distStart.get(entry.getKey()).dist;
+				if(0.8 * r <= cdist && cdist <= r * 1.2)
+					possibleSecondaries.add(entry.getKey());
+			}
+			log("secondaries " + possibleSecondaries.size());
+			if(possibleSecondaries.size() > 0) {
+				Collections.shuffle(possibleSecondaries);
+				primary = anchor;
+				secondary = possibleSecondaries.get(0);
+				break;
+			}
+		}
+		if(secondary == null)
+			return null;
+		List<MapNode> route = new ArrayList<>();
+		MapNode next = secondary;
+		do {
+			route.add(next);
+			next = anchorDist.get(next).node;
+		} while(next != primary);
+		next = primary;
+		do {
+			route.add(next);
+			next = distStart.get(next).node;
+		} while(next != null);
+		Collections.reverse(route);
+		next = secondary;
+		do {
+			next = distStart.get(next).node;
+			if(next == null)
+				break;
+			route.add(next);
+		} while(true);
+		double[][] res = new double[2][route.size()];
+		for(int i = 0;i < route.size();i++) {
+			res[0][i] = route.get(i).lat;
+			res[1][i] = route.get(i).lon;
+		}
+		return res;
+	}
 	@ReactMethod void getLocation(Callback successCallback) {
 		((LocationManager)getCurrentActivity().getSystemService(Context.LOCATION_SERVICE)).requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {
 			@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }
@@ -140,237 +351,5 @@ public class ToastModule extends ReactContextBaseJavaModule {
 				}
 			}
 		);
-		toast("getting location...");
-		// https://stackoverflow.com/questions/7979230/how-to-read-location-only-once-with-locationmanager-gps-and-network-provider-a
-		LocationListener locationListener = new LocationListener() {
-			@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }
-			@Override public void onProviderEnabled(String str) { log("provider enabled: "+str); }
-			@Override public void onStatusChanged(String str,int status,Bundle extras) { log("status changed: "+str); }
-			private boolean initialized = false;
-			private Map<MapNode,List<MapEdge>> adjList = new HashMap<>();
-			private void maybeInit(Location loc) {
-				if(initialized)
-					return;
-				initialized = true;
-				Set<String> permissibleHighways= new HashSet<String>(){{
-					addAll(Arrays.asList(new String[]{
-						"tertiary","unclassified","residential","tertiary_link","living_street","pedestrian","footway","steps"
-					}));
-				}};
-				double d= .01;
-				String url= "http://www.overpass-api.de/api/xapi_meta?*[bbox="
-					+ (loc.getLongitude()-d)+","
-					+ (loc.getLatitude()-d)+","
-					+ (loc.getLongitude()+d)+","
-					+ (loc.getLatitude()+d)
-				+"]";
-				log("creating BufferedInputStream wth URL: "+url);
-				BufferedInputStream iStream = null;
-				try {
-					iStream= new BufferedInputStream(new URL(url).openStream());
-					toast("lat:"+loc.getLatitude()+", long: "+loc.getLongitude());
-				} catch(MalformedURLException e) {
-					throw new RuntimeException(e);
-				} catch(IOException e) {
-					log("couldn't open stream");
-				}
-				DocumentBuilderFactory dbf= DocumentBuilderFactory.newInstance();
-				DocumentBuilder db;
-				try {
-					db = dbf.newDocumentBuilder();
-				} catch(ParserConfigurationException e) {
-					throw new RuntimeException(e);
-				}
-				log("parsing!");
-				Document doc;
-				try {
-					doc = db.parse(iStream);
-				} catch(IOException e) {
-					throw new RuntimeException(e);
-				} catch(SAXException e) {
-					throw new RuntimeException(e);
-				}
-				Map<Long,MapNode> mapNodes = new HashMap<>();
-				NodeList ways = doc.getElementsByTagName("way");
-				List<MapEdge> edgeList = new ArrayList<>();
-				int length = ways.getLength();
-				for(int i = 0;i < length;i++)
-				{
-					Node way = ways.item(i);
-					NodeList children = way.getChildNodes();
-					int numChildren = children.getLength();
-					boolean isRoute = false;
-					List<Long> nodeIdList = new ArrayList<>();
-					for(int j = 0;j < numChildren;j++)
-					{
-						Node child = children.item(j);
-						String childName = child.getNodeName();
-						NamedNodeMap nnm = child.getAttributes();
-						if(childName.equals("nd"))
-						{
-							long nodeId = Long.parseLong(nnm.getNamedItem("ref").getTextContent());
-							nodeIdList.add(nodeId);
-						} else if(childName.equals("tag")) {
-							String k = nnm.getNamedItem("k").getTextContent();
-							String v = nnm.getNamedItem("v").getTextContent();
-							if(k.equals("highway") && permissibleHighways.contains(v))
-								isRoute = true;
-						}
-					}
-					if(isRoute)
-					{
-						log("found route " + i);
-						for(long nodeId : nodeIdList)
-						{
-							if(mapNodes.get(nodeId) == null)
-							{
-								Node node = doc.getElementById(String.valueOf(nodeId));
-								NamedNodeMap nnm = node.getAttributes();
-								double lat = Double.parseDouble(nnm.getNamedItem("lat").getTextContent());
-								double lon = Double.parseDouble(nnm.getNamedItem("lon").getTextContent());
-								MapNode mapNode = new MapNode(lat,lon);
-								adjList.put(mapNode,new ArrayList<>());
-								mapNodes.put(nodeId,mapNode);
-							}
-						}
-						int nilLength = nodeIdList.size();
-						for(int j = 0;j < nilLength - 1;j++)
-						{
-							MapNode nodeA = mapNodes.get(nodeIdList.get(j));
-							MapNode nodeB = mapNodes.get(nodeIdList.get(j + 1));
-							log("edge " + nodeIdList.get(j) + " " + nodeIdList.get(j + 1));
-							edgeList.add(new MapEdge(nodeA,nodeB));
-						}
-					}
-				}
-				for(MapEdge edge : edgeList)
-				{
-					adjList.get(edge.nodeA).add(edge);
-					adjList.get(edge.nodeB).add(edge);
-				}
-			}
-			private Map<MapNode,RouteStep> shortestPaths(MapNode start,double r) {
-				PriorityQueue<RouteStep> pq = new PriorityQueue<>(256,new Comparator<RouteStep>() {
-					@Override
-					public int compare(final RouteStep a,final RouteStep b) {
-						if(a.dist > b.dist)
-							return 1;
-						if(a.dist < b.dist)
-							return -1;
-						return 0;
-					}
-				});
-				pq.add(new RouteStep(0,start));
-				Map<MapNode,RouteStep> dist = new HashMap<>();
-				dist.put(start,new RouteStep(0,null));
-				while(pq.size() > 0) {
-					RouteStep rs = pq.poll();
-					MapNode u = rs.node;
-					if(rs.dist > dist.get(u).dist)
-						continue;
-					for(MapEdge e : adjList.get(u)) {
-						MapNode v = e.getOther(u);
-						RouteStep old = dist.get(v);
-						double odist;
-						if(old == null)
-							odist = Double.POSITIVE_INFINITY;
-						else
-							odist = old.dist;
-						double ndist = rs.dist + e.length;
-						if(ndist > r)
-							continue;
-						if(ndist < odist) {
-							dist.put(v,new RouteStep(ndist,u));
-							pq.add(new RouteStep(ndist,v));
-						}
-					}
-				}
-				return dist;
-			}
-			public double[][] calculateRoute(double lat,double lon,double r)
-			{
-				MapNode start = null;
-				double dist = Double.POSITIVE_INFINITY;
-				for(MapNode node : adjList.keySet())
-				{
-					double cdist = node.distanceTo(lat,lon);
-					if(dist > cdist)
-					{
-						start = node;
-						dist = cdist;
-					}
-				}
-				Map<MapNode,RouteStep> distStart = shortestPaths(start,r);
-				List<MapNode> anchors = new ArrayList<>();
-				for(Map.Entry<MapNode,RouteStep> entry : distStart.entrySet()) {
-					log("dist start " + entry.getValue().dist);
-					double cdist = entry.getValue().dist;
-					if(r / 3 <= cdist && cdist <= r / 2)
-						anchors.add(entry.getKey());
-				}
-				log("# of anchors " + anchors.size());
-				Collections.shuffle(anchors);
-				MapNode primary = null;
-				MapNode secondary = null;
-				Map<MapNode,RouteStep> anchorDist = null;
-				for(MapNode anchor : anchors) {
-					anchorDist = shortestPaths(anchor,r / 2);
-					List<MapNode> possibleSecondaries = new ArrayList<>();
-					for(Map.Entry<MapNode,RouteStep> entry : anchorDist.entrySet()) {
-						double cdist = entry.getValue().dist + distStart.get(anchor).dist + distStart.get(entry.getKey()).dist;
-						if(0.8 * r <= cdist && cdist <= r * 1.2)
-							possibleSecondaries.add(entry.getKey());
-					}
-					log("secondaries " + possibleSecondaries.size());
-					if(possibleSecondaries.size() > 0) {
-						Collections.shuffle(possibleSecondaries);
-						primary = anchor;
-						secondary = possibleSecondaries.get(0);
-						break;
-					}
-				}
-				if(secondary == null)
-					return null;
-				List<MapNode> route = new ArrayList<>();
-				MapNode next = secondary;
-				do {
-					route.add(next);
-					next = anchorDist.get(next).node;
-				} while(next != primary);
-				next = primary;
-				do {
-					route.add(next);
-					next = distStart.get(next).node;
-				} while(next != null);
-				Collections.reverse(route);
-				next = secondary;
-				do {
-					next = distStart.get(next).node;
-					if(next == null)
-						break;
-					route.add(next);
-				} while(true);
-				double[][] res = new double[2][route.size()];
-				for(int i = 0;i < route.size();i++) {
-					res[0][i] = route.get(i).lat;
-					res[1][i] = route.get(i).lon;
-				}
-				return res;
-			}
-			@Override
-			public void onLocationChanged(Location loc) {
-				maybeInit(loc);
-				//calculateRoute(loc.getLatitude(),loc.getLongitude(),5);
-				toast("test");
-			}
-		};
-		locMan.requestSingleUpdate(LocationManager.GPS_PROVIDER,locationListener,null);
-		/*
-		Location fakeLoc = new Location("gps");
-		fakeLoc.setLatitude(43.806683);
-		fakeLoc.setLongitude(-79.424121);
-		locationListener.onLocationChanged(fakeLoc);
-		*/
-		//locationListener.calculateRoute(fakeLoc.getLatitude(),fakeLoc.getLongitude(),5);
 	}
 }
