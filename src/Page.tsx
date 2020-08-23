@@ -35,13 +35,13 @@ const styles = StyleSheet.create({
 	},
 });
 
-const Page = ({ navigation, children }) => (
+const Page = ({ navigation, children, profile }) => (
 	<Container>
 		<Header style={{ backgroundColor: "#5e97da" }}>
 			<Body style={styles.flex}>
 				<Title>RNJogger</Title>
 				<Button transparent onPress={() => navigation.navigate("Profile")}>
-					<Thumbnail source={{ uri: "https://cdn.discordapp.com/attachments/347043966476353538/746779456152272916/unknown.png" }} style={{ width: 45, height: 45 }} />
+					<Thumbnail source={{ uri: profile }} style={{ width: 45, height: 45 }} />
 				</Button>
 			</Body>
 		</Header>

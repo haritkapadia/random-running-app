@@ -23,11 +23,13 @@ export default class App extends React.Component {
 		this.state = {
 			location: [-122.400021, 37.789085],
 			runPath: [],
-			running: false
+			running: false,
+			profile: "https://cdn.discordapp.com/attachments/347043966476353538/746848370605293599/Untitsdsled.png"
 		};
-		this.setLocation = (location) => this.setState({location: location});
-		this.setRunPath = (runPath) => this.setState({runPath: runPath});
-		this.setRunning = (running) => this.setState({running: running});
+		this.setLocation = (location) => this.setState({ location: location });
+		this.setRunPath = (runPath) => this.setState({ runPath: runPath });
+		this.setRunning = (running) => this.setState({ running: running });
+		this.setProfile = (profile) => this.setState({ profile: profile });
 	}
 
 	componentDidMount() {
@@ -48,9 +50,9 @@ export default class App extends React.Component {
 		}).catch((error) => {
 			console.log("exception thrown");
 		});
-		const eventEmitter= new NativeEventEmitter(NativeModules.ToastExample);
-		this.eventListener= eventEmitter.addListener("locUpdate",(event)=>{
-			console.log({lat: event.lat, lon: event.lon});
+		const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
+		this.eventListener = eventEmitter.addListener("locUpdate", (event) => {
+			console.log({ lat: event.lat, lon: event.lon });
 			this.setLocation([event.lon, event.lat]);
 		});
 	}
@@ -59,7 +61,7 @@ export default class App extends React.Component {
 		const calculateRoute = (lat: number, lng: number, radius: number) => [
 			[-122.400021, 37.790085], [-122.401021, 37.791085], [-122.400021, 37.790085]
 		];
-		const customSetRunPath = (radius: number) => {};
+		const customSetRunPath = (radius: number) => { };
 		return (
 			<NavigationContainer>
 				<Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -69,11 +71,11 @@ export default class App extends React.Component {
 					>
 						{(props) => (
 							<RunningPage
-							location={this.state.location}
-							setRunPath={customSetRunPath}
-							running={this.state.running}
-							setRunning={this.setRunning}
-							{...props}
+								location={this.state.location}
+								setRunPath={customSetRunPath}
+								running={this.state.running}
+								setRunning={this.setRunning}
+								{...props}
 							/>
 						)}
 					</Stack.Screen>
@@ -83,27 +85,36 @@ export default class App extends React.Component {
 					>
 						{(props) => (
 							<MapPage
-							location={this.state.location}
-							runPath={this.state.runPath}
-							{...props}
+								location={this.state.location}
+								runPath={this.state.runPath}
+								{...props}
 							/>
-						) }
+						)}
 					</Stack.Screen>
 					<Stack.Screen
-					name="Friends"
-					component={FriendsPage}
-					options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
-					/>
+						name="Friends"
+						options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+					>
+						{(props) => (
+							<FriendsPage profile={this.state.profile} {...props} />
+						)}
+					</Stack.Screen>
 					<Stack.Screen
-					name="Share"
-					component={SharePage}
-					options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
-					/>
+						name="Share"
+						options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+					>
+						{(props) => (
+							<SharePage profile={this.state.profile} {...props} />
+						)}
+					</Stack.Screen>
 					<Stack.Screen
-					name="Profile"
-					component={ProfilePage}
-					options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
-					/>
+						name="Profile"
+						options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }}
+					>
+						{(props) => (
+							<ProfilePage profile={this.state.profile} {...props} />
+						)}
+					</Stack.Screen>
 				</Stack.Navigator>
 			</NavigationContainer>
 
