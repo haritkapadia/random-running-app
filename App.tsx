@@ -21,7 +21,7 @@ export default () => {
 	const [location, setLocation] = React.useState([-122.400021, 37.789085]);
 	const [runPath, setRunPath] = React.useState([[0, 0]]);
 	const [running, setRunning] = React.useState(false);
-	const calculateRoute = (radius: number) => [
+	const calculateRoute = (lat: number, lng: number, radius: number) => [
 		[-122.400021, 37.790085], [-122.401021, 37.791085], [-122.400021, 37.790085]
 	];
 	return (
@@ -36,7 +36,7 @@ export default () => {
 				component={(props) => (
 					<RunningPage
 					location={location}
-					setRunPath={(radius: number) => setRunPath(calculateRoute(radius)) }
+					setRunPath={(radius: number) => setRunPath(calculateRoute(location[0], location[1], radius)) }
 					running={running}
 					setRunning={setRunning}
 					{...props}
