@@ -86,26 +86,45 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) 
 				onPress={async () => {
 					console.log("button clicked");
 					setCount(count + 1);
+					const loc= ToastExample.getLocation(async(lat,lon)=>{
+						await MapboxGL.offlineManager.deletePack("offlinePack");
+						console.log("styleURL:",styleURL);
+						await MapboxGL.offlineManager.setTileCountLimit(10000000);
+						const pack= await MapboxGL.offlineManager.createPack(
+							{
+								name:"offlinePack",
+								styleURL:styleURL,
+								minZoom:14,
+								maxZoom:20,
+								//bounds:[[lon+.5,lat+.5],[lon-.5,lat-.5]]
+//								bounds:[[lon+.8,lat+.8],[lon-.8,lat-.8]]
+								bounds:[[lon+1,lat+1],[lon-1,lat-1]]
+							},
+							(offlineRegion,status)=>console.log("offline region status",offlineRegion,status),
+							(offlineRegion,err)=>console.log("offline region error",offlineRegion,error)
+						);
+						console.log(pack);
+					});
 					/*
-					ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));		
-					try {
-						// https://reactnative.dev/docs/permissionsandroid
-						const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
-							title: "Location Permission",
-							message: "Location is required to download a map of the area around you.",
-							buttonNeutral: "Ask me later",
-							buttonNegative: "Deny",
-							buttonPositive: "Grant",
-						});
-						console.log("granted:", result);
-						if (result !== PermissionsAndroid.RESULTS.GRANTED) {
-							console.log("permission denied");
-							return;
-						}
-					} catch (e) {
-						console.log("exception thrown");
-					}
-					ToastExample.run();*/
+					   ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));		
+					   try {
+					   // https://reactnative.dev/docs/permissionsandroid
+					   const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+					   title: "Location Permission",
+					   message: "Location is required to download a map of the area around you.",
+					   buttonNeutral: "Ask me later",
+					   buttonNegative: "Deny",
+					   buttonPositive: "Grant",
+					   });
+					   console.log("granted:", result);
+					   if (result !== PermissionsAndroid.RESULTS.GRANTED) {
+					   console.log("permission denied");
+					   return;
+					   }
+					   } catch (e) {
+					   console.log("exception thrown");
+					   }
+					   ToastExample.run();*/
 					//ToastExample.show("button clicked", ToastExample.SHORT)
 				}}
 			>
