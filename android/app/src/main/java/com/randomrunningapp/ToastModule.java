@@ -101,7 +101,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		LocationManager locMan= (LocationManager)act.getSystemService(Context.LOCATION_SERVICE);
 		if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			toast("GPS is off and i haven't bothered prompting you to turn it on");
-			return;
+			//return;
 		}
 		log("starting location updates");
 		locMan.requestLocationUpdates(
@@ -124,7 +124,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		);
 		toast("getting location...");
 		// https://stackoverflow.com/questions/7979230/how-to-read-location-only-once-with-locationmanager-gps-and-network-provider-a
-		locMan.requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {
+		LocationListener locationListener = new LocationListener() {
 			@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }
 			@Override public void onProviderEnabled(String str) { log("provider enabled: "+str); }
 			@Override public void onStatusChanged(String str,int status,Bundle extras) { log("status changed: "+str); }
@@ -148,13 +148,14 @@ public class ToastModule extends ReactContextBaseJavaModule {
 				+"]";
 				log("creating BufferedInputStream wth URL: "+url);
 				BufferedInputStream iStream = null;
-//				try {
+				try {
+					iStream= new BufferedInputStream(new URL(url).openStream());
 					toast("lat:"+loc.getLatitude()+", long: "+loc.getLongitude());
-/*				} catch(MalformedURLException e) {
+				} catch(MalformedURLException e) {
 					throw new RuntimeException(e);
 				} catch(IOException e) {
 					log("couldn't open stream");
-				}*/
+				}
 				DocumentBuilderFactory dbf= DocumentBuilderFactory.newInstance();
 				DocumentBuilder db;
 				try {
@@ -171,7 +172,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 				} catch(SAXException e) {
 					throw new RuntimeException(e);
 				}
-				Map<Integer,MapNode> mapNodes = new HashMap<>();
+				Map<Long,MapNode> mapNodes = new HashMap<>();
 				NodeList ways = doc.getElementsByTagName("way");
 				List<MapEdge> edgeList = new ArrayList<>();
 				int length = ways.getLength();
@@ -181,7 +182,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 					NodeList children = way.getChildNodes();
 					int numChildren = children.getLength();
 					boolean isRoute = false;
-					List<Integer> nodeIdList = new ArrayList<>();
+					List<Long> nodeIdList = new ArrayList<>();
 					for(int j = 0;j < numChildren;j++)
 					{
 						Node child = children.item(j);
@@ -189,7 +190,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 						NamedNodeMap nnm = child.getAttributes();
 						if(childName.equals("nd"))
 						{
-							int nodeId = Integer.parseInt(nnm.getNamedItem("ref").getTextContent());
+							long nodeId = Long.parseLong(nnm.getNamedItem("ref").getTextContent());
 							nodeIdList.add(nodeId);
 						} else if(childName.equals("tag")) {
 							String k = nnm.getNamedItem("k").getTextContent();
@@ -200,7 +201,8 @@ public class ToastModule extends ReactContextBaseJavaModule {
 					}
 					if(isRoute)
 					{
-						for(int nodeId : nodeIdList)
+						log("found route " + i);
+						for(long nodeId : nodeIdList)
 						{
 							if(mapNodes.get(nodeId) == null)
 							{
@@ -218,6 +220,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 						{
 							MapNode nodeA = mapNodes.get(nodeIdList.get(j));
 							MapNode nodeB = mapNodes.get(nodeIdList.get(j + 1));
+							log("edge " + nodeIdList.get(j) + " " + nodeIdList.get(j + 1));
 							edgeList.add(new MapEdge(nodeA,nodeB));
 						}
 					}
@@ -230,9 +233,14 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			}
 			@Override
 			public void onLocationChanged(Location loc) {
-				//maybeInit(loc);
+				maybeInit(loc);
 				toast("test");
 			}
-		},null);
+		};
+		locMan.requestSingleUpdate(LocationManager.GPS_PROVIDER,locationListener,null);
+		Location fakeLoc = new Location("gps");
+		fakeLoc.setLatitude(43.806683);
+		fakeLoc.setLongitude(-79.424121);
+		locationListener.onLocationChanged(fakeLoc);
 	}
 }
