@@ -32,7 +32,7 @@ const RunningPage = ({ navigation }) => {
 	const [count, setCount] = useState(0);
 	const windowWidth = Dimensions.get('window').width;
 	return <Page navigation={navigation}>
-		<View>
+		<Content>
 			<Item style={{
 				marginTop: 20,
 				marginLeft: 15,
@@ -48,8 +48,8 @@ const RunningPage = ({ navigation }) => {
 						<Picker
 							mode="dropdown"
 							placeholderIconColor="#007aff"
-						//selectedValue={selected2}
-						//onValueChange={(value: string) => setSelected2(value)}
+							//selectedValue={selected2}
+							//onValueChange={(value: string) => setSelected2(value)}
 						>
 							<Picker.Item label="km" value="key0" />
 							<Picker.Item label="mi" value="key1" />
@@ -58,7 +58,6 @@ const RunningPage = ({ navigation }) => {
 					</Item>
 				</Form>
 			</Content>
-		</View>
 		<View style={styles.container}>
 			<TouchableOpacity
 				style={styles.button}
@@ -66,23 +65,6 @@ const RunningPage = ({ navigation }) => {
 					console.log("button clicked");
 					setCount(count + 1);
 					ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));
-					/*
-					await MapboxGL.offlineManager.deletePack("offlinePack");
-					const packs= await MapboxGL.offlineManager.getPacks();
-					console.log("packs:",packs);
-					packs.map(pack=>console.log("pack:",pack));
-					console.log("createPack: ",await MapboxGL.offlineManager.createPack(
-						{
-							name:"offlinePack",
-							styleURL:styleURL,
-							minZoom:14,
-							maxZoom:22,
-							bounds:[[-79.34631368999999,43.79820711],[-79.36631369,43.778207110000004]]
-						},
-						(offlineRegion,status)=>console.log("progress:",offlineRegion,status),
-						(offlineRegion,err)=>console.log("err:",offlineRegion,err)
-					));*/
-					/*
 					try {
 						// https://reactnative.dev/docs/permissionsandroid
 						const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
@@ -101,7 +83,6 @@ const RunningPage = ({ navigation }) => {
 						console.log("exception thrown");
 					}
 					ToastExample.run();
-					*/
 					//ToastExample.show("button clicked", ToastExample.SHORT)
 				}}
 			>
@@ -109,6 +90,7 @@ const RunningPage = ({ navigation }) => {
 			</TouchableOpacity>
 			<Text>clicked {count} times</Text>
 		</View>
+		</Content>
 	</Page>
 };
 export default RunningPage;
