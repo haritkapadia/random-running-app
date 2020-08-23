@@ -41,13 +41,6 @@ MapboxGL.setAccessToken('Mapbox token');
 MapboxGL.setConnected(true);
 
 class MapPage extends React.Component<{runPath: number[][], location: number[], setLocation}> {
-
-	componentDidMount() {
-		console.log("componentDidMount");
-	}
-	componentWillUnmount() {
-		this.eventListener.remove();
-	}
 	render() {
 		return (
 			<Page navigation={this.props.navigation}>
