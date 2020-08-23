@@ -8,10 +8,9 @@ import {
 	Button,
 	Text as NativeBaseText
 } from "native-base";
-import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import ToastExample from "../ToastExample";
 import Page from "./Page";
-import {styleURL} from "./MapPage";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 
 const styles = StyleSheet.create({
@@ -125,6 +124,7 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) 
 					   console.log("exception thrown");
 					   }
 					   ToastExample.run();*/
+					ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));
 					//ToastExample.show("button clicked", ToastExample.SHORT)
 				}}
 			>
