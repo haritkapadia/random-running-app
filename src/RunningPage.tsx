@@ -116,6 +116,8 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) 
 							(offlineRegion,err)=>console.log("offline region error",offlineRegion,error)
 						);
 						console.log(pack);
+						MapboxGL.setConnected(false);
+						console.log("mapbox disconnected");
 					});
 					/*
 					   ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));		

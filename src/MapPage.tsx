@@ -15,7 +15,8 @@ const stylesheet = StyleSheet.create({
 		flex: 1,
 	}
 });
-const styleURL= "https://gist.githubusercontent.com/diagonalisability/4d308162c5b3759e78c41d68b1175dc6/raw/d724a5cea986697fc872c7119f3832597ba246ee/style.json";
+//const styleURL= "https://gist.githubusercontent.com/diagonalisability/4d308162c5b3759e78c41d68b1175dc6/raw/d724a5cea986697fc872c7119f3832597ba246ee/style.json";
+const styleURL= "https://api.mapbox.com/styles/v1/mapbox/streets-v11.html?title=true&access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NDg1bDA1cjYzM280NHJ5NzlvNDMifQ.d6e-nNyBDtmQCVwVNivz7A#2/0.0/0.0";
 export {styleURL};
 const mapStyles = {
 	runPath: {
@@ -37,7 +38,7 @@ const mapStyles = {
 };
 
 // https://stackoverflow.com/questions/61994333/how-to-implement-geocoder-with-react-native-mapbox-gl-maps-library-in-react-nat
-MapboxGL.setAccessToken('Mapbox token');
+MapboxGL.setAccessToken("pk.eyJ1Ijoia21kcGo1c2FvOSIsImEiOiJja2U2am0xMzMwbGdiMnlwb3pwNzVrYzI2In0.xyMXIO30CGN7I22YqM2COA");
 MapboxGL.setConnected(true);
 
 class MapPage extends React.Component<{runPath: number[][], location: number[], setLocation}> {
@@ -46,7 +47,7 @@ class MapPage extends React.Component<{runPath: number[][], location: number[], 
 			<Page navigation={this.props.navigation}>
 				<MapboxGL.MapView
 					style={stylesheet.map}
-					styleURL="https://gist.githubusercontent.com/diagonalisability/7d66ac89e7d06ce474662f671b750bc6/raw/490018ab10a51694b4c25dbc8b12d01f1e3d7b86/style.json"
+//					styleURL="https://gist.githubusercontent.com/diagonalisability/7d66ac89e7d06ce474662f671b750bc6/raw/490018ab10a51694b4c25dbc8b12d01f1e3d7b86/style.json"
 				>
 					<MapboxGL.Camera
 					zoomLevel={16}
