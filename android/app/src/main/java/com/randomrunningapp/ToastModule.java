@@ -103,7 +103,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 	}
 	private boolean initialized = false;
 	private Map<MapNode,List<MapEdge>> adjList = new HashMap<>();
-	@ReactMethod private void maybeInit(Location loc) {
+	@ReactMethod public void maybeInit(double latitude, double longitude) {
 		if(initialized)
 			return;
 		initialized = true;
@@ -114,16 +114,16 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		}};
 		double d= .01;
 		String url= "http://www.overpass-api.de/api/xapi_meta?*[bbox="
-			+ (loc.getLongitude()-d)+","
-			+ (loc.getLatitude()-d)+","
-			+ (loc.getLongitude()+d)+","
-			+ (loc.getLatitude()+d)
+			+ (longitude-d)+","
+			+ (latitude-d)+","
+			+ (longitude+d)+","
+			+ (latitude+d)
 		+"]";
 		log("creating BufferedInputStream wth URL: "+url);
 		BufferedInputStream iStream = null;
 		try {
 			iStream= new BufferedInputStream(new URL(url).openStream());
-			toast("lat:"+loc.getLatitude()+", long: "+loc.getLongitude());
+			toast("lat:"+latitude+", long: "+longitude);
 		} catch(MalformedURLException e) {
 			throw new RuntimeException(e);
 		} catch(IOException e) {
@@ -242,7 +242,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		}
 		return dist;
 	}
-	@ReactMethod public double[][] calculateRoute(double lat,double lon,double r)
+	@ReactMethod public void calculateRoute(double lat,double lon,double r,Callback callback)
 	{
 		MapNode start = null;
 		double dist = Double.POSITIVE_INFINITY;
@@ -285,7 +285,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			}
 		}
 		if(secondary == null)
-			return null;
+			callback.invoke(0);
 		List<MapNode> route = new ArrayList<>();
 		MapNode next = secondary;
 		do {
@@ -305,12 +305,16 @@ public class ToastModule extends ReactContextBaseJavaModule {
 				break;
 			route.add(next);
 		} while(true);
-		double[][] res = new double[2][route.size()];
+		WritableArray latArr = Arguments.createArray();
+		WritableArray lonArr = Arguments.createArray();
 		for(int i = 0;i < route.size();i++) {
-			res[0][i] = route.get(i).lat;
-			res[1][i] = route.get(i).lon;
+			latArr.pushDouble(route.get(i).lat);
+			lonArr.pushDouble(route.get(i).lon);
 		}
-		return res;
+		WritableArray res = Arguments.createArray();
+		res.pushArray(latArr);
+		res.pushArray(lonArr);
+		callback.invoke(res);
 	}
 	@ReactMethod void getLocation(Callback successCallback) {
 		((LocationManager)getCurrentActivity().getSystemService(Context.LOCATION_SERVICE)).requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {
