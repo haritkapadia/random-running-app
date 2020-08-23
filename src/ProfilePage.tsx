@@ -11,6 +11,11 @@ const styles = StyleSheet.create({
         display: "flex",
         alignItems: "center",
     },
+    name: {
+        fontSize: 25,
+        fontWeight: "bold",
+        marginTop: 30
+    },
     image: {
         width: 300,
         height: 300,
@@ -40,6 +45,7 @@ const options = {
 const ProfilePage = ({ navigation, profile, setProfile }) => {
     return <Page navigation={navigation}>
         <View style={styles.container}>
+            <Text style={styles.name}>Jane Doe</Text>
             <Image
                 source={profile}
                 style={styles.image}
@@ -64,6 +70,9 @@ const ProfilePage = ({ navigation, profile, setProfile }) => {
                 }}
             >
                 <Text style={{ color: "white" }}>Upload Photo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+                <Text style={{ color: "white" }}>Add Friend</Text>
             </TouchableOpacity>
         </View>
     </Page >
