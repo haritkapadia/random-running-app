@@ -44,45 +44,42 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath, pr
 	return (
 		<Page navigation={navigation} profile={profile}>
 			<Content>
-				<Content>
-					<Form style={{ marginRight: 15, flex: 1 }}>
-						<Item style={{
-							marginTop: 20,
-							marginLeft: 15,
-							marginRight: 15,
-							flex: 1,
-						}}>
-							<Input
-								keyboardType="numeric"
-								placeholder="Running distance"
-								onChangeText={(text) => setRadius(text)}
-								value={radius}
-							/>
-						</Item>
-						<Item>
-							<Picker
-								mode="dropdown"
-								placeholderIconColor="#007aff"
-								selectedValue={unit}
-								onValueChange={(value: string) => setUnit(value)}
-							>
-								<Picker.Item label="km" value="km" />
-								<Picker.Item label="mi" value="mi" />
-								<Picker.Item label="m" value="m" />
-							</Picker>
-						</Item>
-						<Button full
-							onPress={() => {
-								setRunPath(parseFloat(radius) * conversion[unit]);
-								setRunning(!running);
-							}}
-							style={{ marginTop: 20, marginLeft: 10 }}
+				<Form style={{ marginRight: 15, flex: 1 }}>
+					<Item style={{
+						marginTop: 20,
+						marginLeft: 15,
+						marginRight: 15,
+						flex: 1,
+					}}>
+						<Input
+							keyboardType="numeric"
+							placeholder="Running distance"
+							onChangeText={(text) => setRadius(text)}
+							value={radius}
+						/>
+					</Item>
+					<Item>
+						<Picker
+							mode="dropdown"
+							placeholderIconColor="#007aff"
+							selectedValue={unit}
+							onValueChange={(value: string) => setUnit(value)}
 						>
-							<NativeBaseText>{running === false ? "Start" : "Stop"}</NativeBaseText>
-						</Button>
-					</Form>
-				</Content>
-
+							<Picker.Item label="km" value="km" />
+							<Picker.Item label="mi" value="mi" />
+							<Picker.Item label="m" value="m" />
+						</Picker>
+					</Item>
+				</Form>
+				<Button
+					full
+					onPress={() => {
+						setRunPath(parseFloat(radius) * conversion[unit]);
+						setRunning(!running);
+					}}
+				>
+					<NativeBaseText>{running === false ? "Start" : "Stop"}</NativeBaseText>
+				</Button>
 			</Content>
 		</Page>
 	);

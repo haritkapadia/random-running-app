@@ -58,10 +58,18 @@ export default class App extends React.Component {
 	}
 
 	render() {
-		const calculateRoute = (lat: number, lng: number, radius: number) => [
-			[-122.400021, 37.790085], [-122.401021, 37.791085], [-122.400021, 37.790085]
-		];
-		const customSetRunPath = (radius: number) => { };
+		const customSetRunPath = async (radius: number) => {
+			console.log("args: lat, long, radius", this.state.location[1], this.state.location[0], radius);
+			await ToastExample.maybeInit(this.state.location[1], this.state.location[0]);
+			await new Promise((resolve, reject) => ToastExample.calculateRoute(
+				this.state.location[1], this.state.location[0], radius, (out) => {
+					console.log("out before", out);
+					const newOut = out[0].map((el) => [out[1], el]);
+					console.log("out after", newOut);
+					resolve(newOut);
+				}
+			));
+		};
 		return (
 			<NavigationContainer>
 				<Stack.Navigator screenOptions={{ headerShown: false }}>
