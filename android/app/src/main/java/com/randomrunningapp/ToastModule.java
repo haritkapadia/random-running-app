@@ -242,7 +242,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		}
 		return dist;
 	}
-	@ReactMethod public void calculateRoute(double lat,double lon,double r,Callback callback)
+	@ReactMethod public void calculateRoute(double lat,double lon,double r,Callback cb,Callback err)
 	{
 		MapNode start = null;
 		double dist = Double.POSITIVE_INFINITY;
@@ -284,38 +284,40 @@ public class ToastModule extends ReactContextBaseJavaModule {
 				break;
 			}
 		}
-		if(secondary == null)
-			callback.invoke(0);
+/*		if(secondary == null) {
+			err.invoke();
+			return;
+		}*/
 		List<MapNode> route = new ArrayList<>();
 		MapNode next = secondary;
-		do {
+		for(;next != primary && next!=null;) { // diagonalisability added the next!=null check
 			route.add(next);
 			next = anchorDist.get(next).node;
-		} while(next != primary);
+		}
 		next = primary;
-		do {
+		for(;next!=null;) {
 			route.add(next);
 			next = distStart.get(next).node;
-		} while(next != null);
+		}
 		Collections.reverse(route);
 		next = secondary;
-		do {
-			next = distStart.get(next).node;
-			if(next == null)
-				break;
+		for(;next!=null;) {
 			route.add(next);
-		} while(true);
+			next = distStart.get(next).node;
+		}
 		WritableArray latArr = Arguments.createArray();
 		WritableArray lonArr = Arguments.createArray();
-		for(int i = 0;i < route.size();i++) {
+		for(int i=0;i<route.size();++i) {
 			latArr.pushDouble(route.get(i).lat);
 			lonArr.pushDouble(route.get(i).lon);
 		}
 		WritableArray res = Arguments.createArray();
 		res.pushArray(latArr);
 		res.pushArray(lonArr);
-		callback.invoke(res);
+		cb.invoke(res);
 	}
+	void foo() {}
+	int a= 1;
 	@ReactMethod void getLocation(Callback successCallback) {
 		((LocationManager)getCurrentActivity().getSystemService(Context.LOCATION_SERVICE)).requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {
 			@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }

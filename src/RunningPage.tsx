@@ -88,36 +88,62 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath, pr
 						onPress={async () => {
 							console.log("button clicked");
 							setCount(count + 1);
-							// https://github.com/react-native-mapbox-gl/maps/blob/master/example/src/examples/CreateOfflineRegion.js
-							const { width, height } = Dimensions.get("window");
-							const MAPBOX_VECTOR_TILE_SIZE = 512;
-							const loc = ToastExample.getLocation(async (lat, lon) => {
-								console.log("aa");
-								const bounds = geoViewport.bounds(
-									[lon, lat],
-									12,
-									[width, height],
-									MAPBOX_VECTOR_TILE_SIZE
-								);
-								await MapboxGL.offlineManager.deletePack("offlinePack");
-								console.log("styleURL:", styleURL);
-								await MapboxGL.offlineManager.setTileCountLimit(10000000);
-								console.log("bounds:", bounds);
-								const pack = await MapboxGL.offlineManager.createPack(
-									{
-										name: "offlinePack",
-										styleURL: styleURL,
-										minZoom: 10,
-										maxZoom: 20,
-										//bounds:[[lon+.5,lat+.5],[lon-.5,lat-.5]]
-										bounds: [[lon + 2, lat + 2], [lon - 2, lat - 2]]
-										//								bounds:[[bounds[0],bounds[1]],[bounds[2],bounds[3]]]
-									},
-									(offlineRegion, status) => console.log("offline region status", offlineRegion, status),
-									(offlineRegion, err) => console.log("offline region error", offlineRegion, error)
-								);
-								console.log(pack);
+							ToastExample.getLocation((lat,lon)=>{
+								console.log("got location:",lat,lon);
+								ToastExample.maybeInit(lat,lon);
+								console.log("initialised");
+								const ret=ToastExample.calculateRoute(lat,lon,5,([lat,lon])=>{
+									console.log("cb was called");
+									console.log("lat:",lat);
+									console.log("lon:",lon);
+								},()=>{
+									console.log("err was called");
+								});
 							});
+							/*
+							const customSetRunPath = async (radius: number) => {
+								console.log("args: lat, long, radius", this.state.location[1], this.state.location[0], radius);
+								
+								await new Promise((resolve, reject) => ToastExample.calculateRoute(
+									this.state.location[1], this.state.location[0], radius, (out) => {
+										console.log("out before", out);
+										const newOut = out[0].map((el) => [out[1], el]);
+										console.log("out after", newOut);
+										resolve(newOut);
+									}
+								));
+							};
+							*/
+							// https://github.com/react-native-mapbox-gl/maps/blob/master/example/src/examples/CreateOfflineRegion.js
+							/*const { width, height } = Dimensions.get("window");
+							   const MAPBOX_VECTOR_TILE_SIZE = 512;
+							   const loc = ToastExample.getLocation(async (lat, lon) => {
+							   console.log("aa");
+							   const bounds = geoViewport.bounds(
+							   [lon, lat],
+							   12,
+							   [width, height],
+							   MAPBOX_VECTOR_TILE_SIZE
+							   );
+							   await MapboxGL.offlineManager.deletePack("offlinePack");
+							   console.log("styleURL:", styleURL);
+							   await MapboxGL.offlineManager.setTileCountLimit(10000000);
+							   console.log("bounds:", bounds);
+							   const pack = await MapboxGL.offlineManager.createPack(
+							   {
+							   name: "offlinePack",
+							   styleURL: styleURL,
+							   minZoom: 10,
+							   maxZoom: 20,
+							   //bounds:[[lon+.5,lat+.5],[lon-.5,lat-.5]]
+							   bounds: [[lon + 2, lat + 2], [lon - 2, lat - 2]]
+							   //								bounds:[[bounds[0],bounds[1]],[bounds[2],bounds[3]]]
+							   },
+							   (offlineRegion, status) => console.log("offline region status", offlineRegion, status),
+							   (offlineRegion, err) => console.log("offline region error", offlineRegion, error)
+							   );
+							   console.log(pack);
+							   });*/
 							/*
 							   ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));
 							   try {
