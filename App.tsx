@@ -52,7 +52,7 @@ export default class App extends React.Component {
 		});
 		const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
 		this.eventListener = eventEmitter.addListener("locUpdate", (event) => {
-			console.log({ lat: event.lat, lon: event.lon });
+			// console.log({ lat: event.lat, lon: event.lon });
 			this.setLocation([event.lon, event.lat]);
 		});
 	}
@@ -61,14 +61,15 @@ export default class App extends React.Component {
 		const customSetRunPath = async (radius: number) => {
 			console.log("args: lat, long, radius", this.state.location[1], this.state.location[0], radius);
 			await ToastExample.maybeInit(this.state.location[1], this.state.location[0]);
-			await new Promise((resolve, reject) => ToastExample.calculateRoute(
-				this.state.location[1], this.state.location[0], radius, (out) => {
-					console.log("out before", out);
-					const newOut = out[0].map((el) => [out[1], el]);
+			ToastExample.calculateRoute(
+				this.state.location[1], this.state.location[0], radius, ([lat, lon]) => {
+					console.log("out before", [lat, lon]);
+					const newOut = lat.map((l, idx) => [lon[idx], l]);
 					console.log("out after", newOut);
-					resolve(newOut);
-				}
-			));
+					this.setRunPath(newOut);
+				},
+				(err) => console.log(err)
+			);
 		};
 		return (
 			<NavigationContainer>
