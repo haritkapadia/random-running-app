@@ -71,11 +71,12 @@ export default class App extends React.Component {
 					>
 						{(props) => (
 							<RunningPage
-								location={this.state.location}
-								setRunPath={customSetRunPath}
-								running={this.state.running}
-								setRunning={this.setRunning}
-								{...props}
+							location={this.state.location}
+							setRunPath={customSetRunPath}
+							running={this.state.running}
+							setRunning={this.setRunning}
+							profile={this.state.profile}
+							{...props}
 							/>
 						)}
 					</Stack.Screen>
@@ -85,9 +86,10 @@ export default class App extends React.Component {
 					>
 						{(props) => (
 							<MapPage
-								location={this.state.location}
-								runPath={this.state.runPath}
-								{...props}
+							location={this.state.location}
+							runPath={this.state.runPath}
+							profile={this.state.profile}
+							{...props}
 							/>
 						)}
 					</Stack.Screen>
