@@ -4,10 +4,10 @@ import {
 	Input,
 	Content,
 	Picker,
-	Container,
 	Form,
+	Button,
 } from "native-base";
-import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text, Dimensions } from "react-native";
+import { StyleSheet, View, TouchableOpacity, PermissionsAndroid, Text } from "react-native";
 import ToastExample from "../ToastExample";
 import Page from "./Page";
 import {styleURL} from "./MapPage";
@@ -28,33 +28,42 @@ const styles = StyleSheet.create({
 		alignItems: "center"
 	},
 });
-const RunningPage = ({ navigation }) => {
+const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) => {
 	const [count, setCount] = useState(0);
-	const windowWidth = Dimensions.get('window').width;
+	const [unit, setUnit] = useState("km");
 	return <Page navigation={navigation}>
 		<Content>
-			<Item style={{
-				marginTop: 20,
-				marginLeft: 15,
-				marginRight: 15,
-				flex: 1,
-			}}>
-				<Input keyboardType="numeric" placeholder="Running distance" placeholderTextColor="black" />
-			</Item>
-
 			<Content>
 				<Form style={{ marginRight: 15, flex: 1 }}>
+					<Item style={{
+						marginTop: 20,
+						marginLeft: 15,
+						marginRight: 15,
+						flex: 1,
+					}}>
+						<Input keyboardType="numeric" placeholder="Running distance" placeholderTextColor="black" />
+					</Item>
 					<Item regularpicker>
 						<Picker
 							mode="dropdown"
 							placeholderIconColor="#007aff"
-							//selectedValue={selected2}
-							//onValueChange={(value: string) => setSelected2(value)}
+							selectedValue={unit}
+							onValueChange={(value: string) => setUnit(value)}
 						>
-							<Picker.Item label="km" value="key0" />
-							<Picker.Item label="mi" value="key1" />
-							<Picker.Item label="m" value="key1" />
+							<Picker.Item label="km" value="km" />
+							<Picker.Item label="mi" value="mi" />
+							<Picker.Item label="m" value="m" />
 						</Picker>
+					</Item>
+					<Item>
+						<Button
+							onPress={() => {
+								setRunPath(location);
+								setRunning(!running);
+							}}
+						>
+							<Text>{running === false ? "Start" : "Stop"}</Text>
+						</Button>
 					</Item>
 				</Form>
 			</Content>
