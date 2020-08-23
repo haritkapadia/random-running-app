@@ -73,7 +73,8 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) 
 				onPress={async () => {
 					console.log("button clicked");
 					setCount(count + 1);
-					ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));
+					/*
+					ToastExample.getLocation((lat,lon)=>console.log("got loc: ",lat,",",lon));		
 					try {
 						// https://reactnative.dev/docs/permissionsandroid
 						const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
@@ -91,7 +92,7 @@ const RunningPage = ({ navigation, running, setRunning, location, setRunPath }) 
 					} catch (e) {
 						console.log("exception thrown");
 					}
-					ToastExample.run();
+					ToastExample.run();*/
 					//ToastExample.show("button clicked", ToastExample.SHORT)
 				}}
 			>
