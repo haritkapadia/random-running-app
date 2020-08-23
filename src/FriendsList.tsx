@@ -108,6 +108,38 @@ const FriendsList = () => (
                         <Text>Liam Singh</Text>
                     </Body>
                 </ListItem>
+                <ListItem avatar>
+                    <Left>
+                        <Thumbnail source={{ uri: "https://www.fakepersongenerator.com/Face/male/male1084963523041.jpg" }} />
+                    </Left>
+                    <Body>
+                        <Text>Cedric Cothern</Text>
+                    </Body>
+                </ListItem>
+                <ListItem avatar>
+                    <Left>
+                        <Thumbnail source={{ uri: "https://www.fakepersongenerator.com/Face/female/female1022741436035.jpg" }} />
+                    </Left>
+                    <Body>
+                        <Text>Ana Coleman</Text>
+                    </Body>
+                </ListItem>
+                <ListItem avatar>
+                    <Left>
+                        <Thumbnail source={{ uri: "https://www.fakepersongenerator.com/Face/male/male1085244116944.jpg" }} />
+                    </Left>
+                    <Body>
+                        <Text>Gavin Stine</Text>
+                    </Body>
+                </ListItem>
+                <ListItem avatar>
+                    <Left>
+                        <Thumbnail source={{ uri: "https://www.fakepersongenerator.com/Face/male/male108464542267.jpg" }} />
+                    </Left>
+                    <Body>
+                        <Text>Wilson Picard</Text>
+                    </Body>
+                </ListItem>
             </List>
         </Content>
     </Container>

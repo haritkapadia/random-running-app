@@ -316,8 +316,6 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		res.pushArray(lonArr);
 		cb.invoke(res);
 	}
-	void foo() {}
-	int a= 1;
 	@ReactMethod void getLocation(Callback successCallback) {
 		((LocationManager)getCurrentActivity().getSystemService(Context.LOCATION_SERVICE)).requestSingleUpdate(LocationManager.GPS_PROVIDER,new LocationListener() {
 			@Override public void onProviderDisabled(String str) { log("provider disabled: "+str); }
