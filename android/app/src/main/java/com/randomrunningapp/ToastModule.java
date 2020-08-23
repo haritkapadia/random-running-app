@@ -300,11 +300,12 @@ public class ToastModule extends ReactContextBaseJavaModule {
 						dist = cdist;
 					}
 				}
-				Map<MapNode,RouteStep> distStart = shortestPaths(start,r / 2);
+				Map<MapNode,RouteStep> distStart = shortestPaths(start,r);
 				List<MapNode> anchors = new ArrayList<>();
 				for(Map.Entry<MapNode,RouteStep> entry : distStart.entrySet()) {
-					log("dist start " + entry.getValue());
-					if(entry.getValue().dist >= r / 3)
+					log("dist start " + entry.getValue().dist);
+					double cdist = entry.getValue().dist;
+					if(r / 3 <= cdist && cdist <= r / 2)
 						anchors.add(entry.getKey());
 				}
 				log("# of anchors " + anchors.size());
@@ -359,6 +360,7 @@ public class ToastModule extends ReactContextBaseJavaModule {
 			@Override
 			public void onLocationChanged(Location loc) {
 				maybeInit(loc);
+				calculateRoute(loc.getLatitude(),loc.getLongitude(),5);
 				toast("test");
 			}
 		};
@@ -367,5 +369,6 @@ public class ToastModule extends ReactContextBaseJavaModule {
 		fakeLoc.setLatitude(43.806683);
 		fakeLoc.setLongitude(-79.424121);
 		locationListener.onLocationChanged(fakeLoc);
+		//locationListener.calculateRoute(fakeLoc.getLatitude(),fakeLoc.getLongitude(),5);
 	}
 }
